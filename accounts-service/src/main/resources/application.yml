@@ -5,6 +5,12 @@ spring:
   application:
     name: accounts-service  # Nombre de la app (aparece en logs y actuator)
 
+
+  # Asegura ISO8601 y no timestamps en application.yml:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
   # === DATASOURCE: conexión a PostgreSQL ===
   datasource:
     url: jdbc:postgresql://localhost:5432/accounts_cmd
@@ -49,9 +55,3 @@ management:
     web:
       exposure:
         include: health,info
-
-
-
-jackson:
-  serialization:
-    write-dates-as-timestamps: false

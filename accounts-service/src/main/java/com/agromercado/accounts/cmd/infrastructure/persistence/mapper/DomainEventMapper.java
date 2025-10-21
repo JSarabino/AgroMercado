@@ -12,9 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class DomainEventMapper {
 
-  private final ObjectMapper mapper; // el de Spring ya trae JavaTimeModule
+  private final ObjectMapper mapper;
 
-  public DomainEventMapper(ObjectMapper mapper) { this.mapper = mapper; }
+  // Spring inyecta su ObjectMapper (ya con Jdk8Module + JavaTimeModule)
+  public DomainEventMapper(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
 
   public OutboxEntity toEntity(DomainEvent event) {
     try {

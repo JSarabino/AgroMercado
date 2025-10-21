@@ -38,8 +38,11 @@ public class AfiliacionCommandController {
 
     // 2) Mapear DTO -> Command
     //var command = mapper.toCommand(request, solicitanteDesdeJwt);
+
+    System.out.println("ENTRA A MAPPEAR DE DTO A COMMAND!!!!!!!!!!!!!!!!!!!!");
     var command = mapper.toCommand(request, null);
 
+    System.out.println("SALE DE MAPPEAR DE DTO A COMMAND!!!!!!!!!!!!!!!!!!!!");
     // 3) Ejecutar caso de uso
     SolicitarAfiliacionZonaResult result = handler.handle(command);
 
