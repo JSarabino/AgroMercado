@@ -38,11 +38,14 @@ public class SolicitarAfiliacionZonaHandler {
   @Transactional
   public SolicitarAfiliacionZonaResult handle(SolicitarAfiliacionZonaCommand cmd) {
 
+
+    System.out.println("ENTRA A VALIDAR solicitanteUsuarioId!!!!!!!!!!!!!!!!!!!!");
     // 1) Validaciones de aplicación (autorización, precondiciones simples)
     if (cmd.solicitanteUsuarioId() == null || cmd.solicitanteUsuarioId().isBlank()) {
       throw new IllegalArgumentException("solicitanteUsuarioId es requerido");
     }
 
+    System.out.println("ENTRA A ARMAR VOs!!!!!!!!!!!!!!!!!!!!");
     // 2) Armar VOs (validación de forma va dentro de cada VO)
     var contacto = new Contacto(cmd.telefono(), cmd.correo());
     var representante = new Representante(
@@ -53,14 +56,17 @@ public class SolicitarAfiliacionZonaHandler {
     );
     var datosZona = new DatosZona(cmd.nombreVereda(), cmd.municipio(), contacto, representante);
 
+    System.out.println("ENTRA CREAR EL AGREGADO POR LA FABRICA!!!!!!!!!!!!!!!!!!!!");
     // 3) Crear el agregado por su FÁBRICA de dominio (emite DomainEvent)
     var agg = AfiliacionZona.solicitar(cmd.solicitanteUsuarioId(), datosZona, domainEventsFactory);
 
+    System.out.println("ENTRA A PERSISTIR EL AGREGADO!!!!!!!!!!!!!!!!!!!!");
     // 4) Persistir agregado y outbox (misma transacción)
     afiliacionStore.save(agg);           // entidad JPA ↔ agregado
     var events = agg.pullDomainEvents(); // extrae y limpia el buffer interno
     outboxStore.saveAll(events);         // guarda en outbox (infra)
 
+    System.out.println("DEVUELVE EL RESULTADO!!!!!!!!!!!!!!!!!!!!");
     // 5) Resultado para el API
     return new SolicitarAfiliacionZonaResult(
         agg.getAfiliacionId().value(),
