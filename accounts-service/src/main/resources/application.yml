@@ -5,6 +5,23 @@ spring:
   application:
     name: accounts-service  # Nombre de la app (aparece en logs y actuator)
 
+  # === JPA / HIBERNATE ===
+  jpa:
+    hibernate:
+      ddl-auto: validate       # usa Flyway para crear tablas, no hibernate
+    open-in-view: false
+    show-sql: true
+    properties:
+      hibernate:
+        '[format_sql]': true
+        jdbc:
+          '[time_zone]': UTC
+
+  # === Mongo ===
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/accounts_qry
+      database: accounts_qry
 
   # Asegura ISO8601 y no timestamps en application.yml:
   jackson:
@@ -18,16 +35,6 @@ spring:
     password: ${POSTGRES_PASSWORD:accounts}
     hikari:
       maximum-pool-size: 10
-
-  # === JPA / HIBERNATE ===
-  jpa:
-    hibernate:
-      ddl-auto: validate       # usa Flyway para crear tablas, no hibernate
-    open-in-view: false
-    show-sql: true
-    properties:
-      hibernate.format_sql: true
-      hibernate.jdbc.time_zone: UTC
 
   # === FLYWAY: migraciones automáticas ===
   flyway:
@@ -47,7 +54,9 @@ spring:
 logging:
   level:
     root: INFO
-    com.agromercado.accounts: DEBUG
+    com:
+      agromercado:
+        accounts: DEBUG
 
 # === ACTUATOR: endpoints de monitoreo ===
 management:

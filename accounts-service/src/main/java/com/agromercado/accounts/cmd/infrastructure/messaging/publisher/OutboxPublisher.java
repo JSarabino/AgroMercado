@@ -3,7 +3,9 @@ package com.agromercado.accounts.cmd.infrastructure.messaging.publisher;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,25 +18,27 @@ public class OutboxPublisher {
 
   private final OutboxJpaRepository repo;
   private final RabbitTemplate rabbit;
-  private final String exchangeName = "agromercado.events.exchange";
+  private final TopicExchange exchange;
 
-  public OutboxPublisher(OutboxJpaRepository repo, RabbitTemplate rabbitTemplate) {
+  public OutboxPublisher(
+      OutboxJpaRepository repo,
+      @Qualifier("cmdRabbitTemplate") RabbitTemplate rabbitTemplate,
+      @Qualifier("cmdExchange") TopicExchange exchange
+  ) {
     this.repo = repo;
     this.rabbit = rabbitTemplate;
+    this.exchange = exchange;
   }
 
   @Scheduled(fixedDelay = 5000)
   @Transactional
   public void publishPendingEvents() {
-    // LEE UNA LISTA TIPADA
     List<OutboxEntity> pendientes = repo.findTop100ByStatusOrderByOccurredAtAsc("PENDING");
-    // Si usas la versión con locking:
-    // List<OutboxEntity> pendientes = repo.lockBatchByStatusAsc("PENDING", 100);
 
     for (OutboxEntity e : pendientes) {
       try {
-        String routingKey = e.getEventType() + ".v1";  // ej: afiliacion.solicitada.v1
-        rabbit.convertAndSend(exchangeName, routingKey, e.getPayload());
+        String routingKey = e.getEventType() + ".v1"; // p.ej. AfiliacionSolicitada.v1
+        rabbit.convertAndSend(exchange.getName(), routingKey, e.getPayload());
         e.setStatus("SENT");
         e.setSentAt(Instant.now());
         e.setLastError(null);
@@ -43,7 +47,7 @@ public class OutboxPublisher {
         e.setLastError(shorten(ex.getMessage(), 500));
       }
     }
-    // @Transactional hará commit de los estados SENT/FAILED
+    // Al estar dentro de @Transactional, los cambios se hacen flush/commit.
   }
 
   private static String shorten(String s, int max) {

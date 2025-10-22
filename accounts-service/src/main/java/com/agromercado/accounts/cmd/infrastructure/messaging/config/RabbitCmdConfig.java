@@ -7,17 +7,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class RabbitConfig {
+public class RabbitCmdConfig {
 
-  public static final String EVENTS_EXCHANGE = "agromercado.events.exchange";
+  public static final String CMD_EVENTS_EXCHANGE = "agromercado.events.exchange";
 
-  @Bean
-  public TopicExchange eventsExchange() {
-    return new TopicExchange(EVENTS_EXCHANGE, true, false);
+  @Bean("cmdExchange")
+  public TopicExchange cmdExchange() {
+    return new TopicExchange(CMD_EVENTS_EXCHANGE, true, false);
   }
 
-  @Bean
-  public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+  @Bean("cmdRabbitTemplate")
+  public RabbitTemplate cmdRabbitTemplate(ConnectionFactory connectionFactory) {
     return new RabbitTemplate(connectionFactory);
   }
 }
