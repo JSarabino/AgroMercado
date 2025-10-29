@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Size;
 
 /** Payload HTTP de entrada (formulario de solicitud). */
 public record SolicitarAfiliacionRequest(
-    // Si aún no hay login, puede venir en el body; si hay JWT, lo ignoras y usas el subject
-    String solicitanteUsuarioId,
 
     @NotBlank @Size(max = 120)
     String nombreVereda,

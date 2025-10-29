@@ -2,8 +2,8 @@ package com.agromercado.accounts.cmd.api.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import com.agromercado.accounts.cmd.api.dto.in.SolicitarAfiliacionRequest;
@@ -29,25 +29,26 @@ public class AfiliacionCommandController {
 
   @PostMapping("/solicitar")
   public ResponseEntity<AfiliacionResponse> solicitar(
-      @Valid @RequestBody SolicitarAfiliacionRequest request //,
-      // Si aún no tienes seguridad, puedes quitar este parámetro sin problema
-      //@AuthenticationPrincipal Jwt jwt
+      @Valid @RequestBody SolicitarAfiliacionRequest request,
+      @AuthenticationPrincipal Jwt jwt
   ) {
-    // 1) Tomar el userId del JWT si hay seguridad; si no, quedará null y usaremos el del body
-    //String solicitanteDesdeJwt = (jwt != null) ? jwt.getSubject() : null;
+    // 1) Requiere autenticación y subject presente
+    if (jwt == null || jwt.getSubject() == null || jwt.getSubject().isBlank()) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 
-    // 2) Mapear DTO -> Command
-    //var command = mapper.toCommand(request, solicitanteDesdeJwt);
+    // 2) Mapear DTO -> Command (userId viene del JWT, NO del body)
+    var command = mapper.toCommand(request, jwt.getSubject());
 
-    System.out.println("ENTRA A MAPPEAR DE DTO A COMMAND!!!!!!!!!!!!!!!!!!!!");
-    var command = mapper.toCommand(request, null);
-
-    System.out.println("SALE DE MAPPEAR DE DTO A COMMAND!!!!!!!!!!!!!!!!!!!!");
-    // 3) Ejecutar caso de uso
+    // 3) Caso de uso (application)
     SolicitarAfiliacionZonaResult result = handler.handle(command);
 
-    // 4) Mapear a respuesta HTTP
-    var response = new AfiliacionResponse(result.afiliacionId(), result.zonaId(), result.mensaje());
+    // 4) DTO de salida (API)
+    var response = new AfiliacionResponse(
+        result.afiliacionId(),
+        result.zonaId(),
+        result.mensaje()
+    );
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 }

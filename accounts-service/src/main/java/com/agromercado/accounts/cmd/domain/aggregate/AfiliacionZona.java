@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.agromercado.accounts.cmd.domain.enum_.EstadoAfiliacion;
+import com.agromercado.accounts.cmd.domain.event.afiliacion.AfiliacionAprobada;
+import com.agromercado.accounts.cmd.domain.event.afiliacion.AfiliacionRechazada;
 import com.agromercado.accounts.cmd.domain.event.afiliacion.AfiliacionSolicitada;
 import com.agromercado.accounts.cmd.domain.event.domain.DomainEvent;
 import com.agromercado.accounts.cmd.domain.event.domain.DomainEvents;
@@ -65,6 +67,50 @@ public class AfiliacionZona {
         datos.representante().correo()));
 
     return agg;
+  }
+
+  /** HU02: aprobar afiliación. */
+  public AfiliacionAprobada aprobar(String adminGlobalId, String observaciones, DomainEvents factory) {
+    ensureEstado(EstadoAfiliacion.PENDIENTE);
+    this.estado = EstadoAfiliacion.APROBADA;
+    var meta = factory.newMeta("AfiliacionZona", afiliacionId.value(), zonaId.value(),
+        this.version + 1, adminGlobalId, null, null);
+
+    var evt = new AfiliacionAprobada(
+        factory.newEventId(),
+        factory.now(),
+        meta,
+        solicitanteUsuarioId,
+        observaciones
+    );
+    this.version++;
+    this.domainEvents.add(evt);
+    return evt;
+  }
+
+  /** HU02: rechazar afiliación. */
+  public AfiliacionRechazada rechazar(String adminGlobalId, String observaciones, DomainEvents factory) {
+    ensureEstado(EstadoAfiliacion.PENDIENTE);
+    this.estado = EstadoAfiliacion.RECHAZADA;
+    var meta = factory.newMeta("AfiliacionZona", afiliacionId.value(), zonaId.value(),
+        this.version + 1, adminGlobalId, null, null);
+
+    var evt = new AfiliacionRechazada(
+        factory.newEventId(),
+        factory.now(),
+        meta,
+        solicitanteUsuarioId,
+        observaciones
+    );
+    this.version++;
+    this.domainEvents.add(evt);
+    return evt;
+  }
+
+  private void ensureEstado(EstadoAfiliacion esperado) {
+    if (this.estado != esperado) {
+      throw new IllegalStateException("Transición inválida desde " + this.estado);
+    }
   }
 
   public List<DomainEvent> pullDomainEvents() {
