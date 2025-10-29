@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "app.jwt.dev.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Habilita el emisor/validador DEV de JWT HMAC (solo desarrollo)."
+    },
+    {
+      "name": "app.jwt.dev.secret",
+      "type": "java.lang.String",
+      "defaultValue": "dev-super-secret-32-bytes",
+      "description": "Secreto HMAC para firmar/validar JWT en DEV."
+    },
+    {
+      "name": "app.jwt.dev.ttl-seconds",
+      "type": "java.lang.Long",
+      "defaultValue": 3600,
+      "description": "Tiempo de vida del token dev en segundos."
+    }
+  ]
+}

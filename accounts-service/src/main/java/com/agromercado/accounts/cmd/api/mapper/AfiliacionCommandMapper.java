@@ -1,7 +1,5 @@
 package com.agromercado.accounts.cmd.api.mapper;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Component;
 
 import com.agromercado.accounts.cmd.api.dto.in.SolicitarAfiliacionRequest;
@@ -12,20 +10,18 @@ import com.agromercado.accounts.cmd.application.command.SolicitarAfiliacionZonaC
 public class AfiliacionCommandMapper {
 
   public SolicitarAfiliacionZonaCommand toCommand(SolicitarAfiliacionRequest dto, String solicitanteDesdeJwt) {
-    String solicitante = (solicitanteDesdeJwt != null && !solicitanteDesdeJwt.isBlank())
-        ? solicitanteDesdeJwt
-        : (dto.solicitanteUsuarioId() != null && !dto.solicitanteUsuarioId().isBlank()
-            ? dto.solicitanteUsuarioId()
-            : "temp-" + UUID.randomUUID());
-
+    if (solicitanteDesdeJwt == null || solicitanteDesdeJwt.isBlank()) {
+      throw new IllegalArgumentException("Usuario autenticado requerido");
+    }
     return new SolicitarAfiliacionZonaCommand(
-        solicitante,
+        solicitanteDesdeJwt,
         dto.nombreVereda(),
         dto.municipio(),
         dto.telefono(),
         dto.correo(),
         dto.representanteNombre(),
         dto.representanteDocumento(),
-        dto.representanteCorreo());
+        dto.representanteCorreo()
+    );
   }
 }

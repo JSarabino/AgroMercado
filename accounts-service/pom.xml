@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.6</version>
+    <version>3.5.7</version>
     <relativePath/>
   </parent>
 
@@ -40,12 +40,11 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-mongodb</artifactId>
     </dependency>
-    <!--
+    <!-- Seguridad + Resource Server (JWT) -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
-    -->
     <!-- Soporte para java.util.Optional -->
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -66,6 +65,13 @@
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- Genera metadatos para propiedades personalizadas (autocompletado en YML) -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <!-- DB & Migraciones -->
@@ -108,7 +114,6 @@
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
-      <version>${lombok.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -143,7 +148,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
         <configuration>
           <release>21</release>
           <annotationProcessorPaths>
