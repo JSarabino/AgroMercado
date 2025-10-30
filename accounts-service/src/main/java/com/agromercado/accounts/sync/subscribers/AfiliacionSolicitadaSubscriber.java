@@ -6,6 +6,7 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import com.agromercado.accounts.qry.proyections.AfiliacionZonaProjector;
+import com.agromercado.accounts.qry.proyections.dto.AfiliacionSolicitadaDTO;
 import com.agromercado.accounts.sync.config.RabbitSyncConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,25 +23,36 @@ public class AfiliacionSolicitadaSubscriber {
 
   @RabbitListener(queues = RabbitSyncConfig.SYNC_QUEUE)
   public void onMessage(Message<String> message) {
-    String json = message.getPayload();
-    String rk   = (String) message.getHeaders().get(AmqpHeaders.RECEIVED_ROUTING_KEY);
+    final String json = message.getPayload();
+
+    // Null-safe: si no viene el header, usa cadena vacía
+    final String rk = (String) message.getHeaders()
+        .getOrDefault(AmqpHeaders.RECEIVED_ROUTING_KEY, "");
 
     try {
-      switch (rk) {
-        case RabbitSyncConfig.RK_AFILIACION_SOLICITADA -> {
-          var dto = mapper.readValue(json, com.agromercado.accounts.qry.proyections.dto.AfiliacionSolicitadaDTO.class);
-          projector.on(dto);
-        }
-        case RabbitSyncConfig.RK_AFILIACION_APROBADA -> {
-          var dto = mapper.readValue(json, com.agromercado.accounts.sync.contracts.AfiliacionAprobadaMsg.class);
-          projector.onAprobada(dto);
-        }
-        case RabbitSyncConfig.RK_AFILIACION_RECHAZADA -> {
-          var dto = mapper.readValue(json, com.agromercado.accounts.sync.contracts.AfiliacionRechazadaMsg.class);
-          projector.onRechazada(dto);
-        }
-        default -> throw new IllegalArgumentException("Routing key no soportada: " + rk);
+      if (RabbitSyncConfig.RK_AFILIACION_SOLICITADA.equals(rk)) {
+        AfiliacionSolicitadaDTO dto =
+            mapper.readValue(json, AfiliacionSolicitadaDTO.class);
+        projector.on(dto);
+        return;
       }
+
+      if (RabbitSyncConfig.RK_AFILIACION_APROBADA.equals(rk)) {
+        var dto = mapper.readValue(json,
+            com.agromercado.accounts.sync.contracts.AfiliacionAprobadaMsg.class);
+        projector.onAprobada(dto);
+        return;
+      }
+
+      if (RabbitSyncConfig.RK_AFILIACION_RECHAZADA.equals(rk)) {
+        var dto = mapper.readValue(json,
+            com.agromercado.accounts.sync.contracts.AfiliacionRechazadaMsg.class);
+        projector.onRechazada(dto);
+        return;
+      }
+
+      // rk vacío o no reconocido
+      throw new IllegalArgumentException("Routing key no soportada o vacía: '" + rk + "'");
     } catch (Exception e) {
       throw new RuntimeException("Error procesando mensaje (" + rk + "): " + e.getMessage(), e);
     }

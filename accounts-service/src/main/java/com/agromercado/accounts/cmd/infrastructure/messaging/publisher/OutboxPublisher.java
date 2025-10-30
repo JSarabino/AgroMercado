@@ -3,7 +3,6 @@ package com.agromercado.accounts.cmd.infrastructure.messaging.publisher;
 import java.time.Instant;
 import java.util.List;
 
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,16 +17,13 @@ public class OutboxPublisher {
 
   private final OutboxJpaRepository repo;
   private final RabbitTemplate rabbit;
-  private final TopicExchange exchange;
 
   public OutboxPublisher(
       OutboxJpaRepository repo,
-      @Qualifier("cmdRabbitTemplate") RabbitTemplate rabbitTemplate,
-      @Qualifier("cmdExchange") TopicExchange exchange
+      @Qualifier("cmdRabbitTemplate") RabbitTemplate rabbitTemplate
   ) {
     this.repo = repo;
     this.rabbit = rabbitTemplate;
-    this.exchange = exchange;
   }
 
   @Scheduled(fixedDelay = 5000)
@@ -37,8 +33,10 @@ public class OutboxPublisher {
 
     for (OutboxEntity e : pendientes) {
       try {
-        String routingKey = e.getEventType() + ".v1"; // p.ej. AfiliacionSolicitada.v1
-        rabbit.convertAndSend(exchange.getName(), routingKey, e.getPayload());
+        String routingKey = ensureVersionedRoutingKey(e.getEventType());
+        // exchange ya está seteado en el template (RabbitCmdConfig.cmdRabbitTemplate)
+        rabbit.convertAndSend(routingKey, e.getPayload());
+
         e.setStatus("SENT");
         e.setSentAt(Instant.now());
         e.setLastError(null);
@@ -47,7 +45,15 @@ public class OutboxPublisher {
         e.setLastError(shorten(ex.getMessage(), 500));
       }
     }
-    // Al estar dentro de @Transactional, los cambios se hacen flush/commit.
+    // Dentro de @Transactional: flush/commit automático
+  }
+
+  /** Si el eventType ya viene con ".vX", úsalo tal cual; si no, agrega ".v1". */
+  private static String ensureVersionedRoutingKey(String eventType) {
+    if (eventType == null || eventType.isBlank()) return "Unknown.v1";
+    // Heurística simple: si contiene ".v" seguido de dígitos, se asume versionado
+    if (eventType.matches(".*\\.v\\d+$")) return eventType;
+    return eventType + ".v1";
   }
 
   private static String shorten(String s, int max) {

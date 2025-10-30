@@ -1,23 +1,22 @@
 package com.agromercado.accounts.cmd.application.handler;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.agromercado.accounts.cmd.application.command.usuario.AgregarRolGlobalCommand;
+import com.agromercado.accounts.cmd.application.command.usuario.OtorgarMembresiaZonalCommand;
 import com.agromercado.accounts.cmd.application.port.out.OutboxInterface;
 import com.agromercado.accounts.cmd.application.port.out.UsuarioInterface;
 import com.agromercado.accounts.cmd.domain.event.domain.DomainEvents;
 
-import jakarta.transaction.Transactional;
-
 @Service
-public class AgregarRolGlobalHandler {
+public class OtorgarMembresiaZonalHandler {
   private final UsuarioInterface store; private final OutboxInterface outbox; private final DomainEvents de;
-  public AgregarRolGlobalHandler(UsuarioInterface s, OutboxInterface o, DomainEvents d){ this.store=s; this.outbox=o; this.de=d; }
+  public OtorgarMembresiaZonalHandler(UsuarioInterface s, OutboxInterface o, DomainEvents d){ this.store=s; this.outbox=o; this.de=d; }
 
   @Transactional
-  public void handle(AgregarRolGlobalCommand cmd){
+  public void handle(OtorgarMembresiaZonalCommand cmd){
     var agg = store.findById(cmd.usuarioId()).orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
-    agg.agregarRolGlobal(cmd.rolGlobal(), de, cmd.adminActorId());
+    agg.otorgarMembresiaZonal(cmd.zonaId(), cmd.rolZonal(), de, cmd.causedBy());
     store.save(agg);
     outbox.saveAll(agg.pullDomainEvents());
   }
