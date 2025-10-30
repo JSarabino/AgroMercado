@@ -4,13 +4,14 @@ import java.time.Instant;
 
 import com.agromercado.accounts.qry.proyections.dto.EventMetadataDTO;
 
-public record AfiliacionSolicitadaMsg(
+
+public record AfiliacionRechazadaMsg(
     String eventId,
     Instant occurredAt,
     EventMetadataDTO meta,
-    String nombreVereda,
-    String municipio,
-    String representanteNombre,
-    String representanteDocumento,
-    String representanteCorreo
+    String afiliacionId,
+    String zonaId,
+    String solicitanteUsuarioId,
+    String observaciones,
+    String nuevoEstado        // "RECHAZADA"
 ) {}

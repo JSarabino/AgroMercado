@@ -1,5 +1,6 @@
 package com.agromercado.accounts.qry.proyections.dto;
 
+
 public record EventMetadataDTO(
     String aggregateType,
     String aggregateId,
