@@ -1,5 +1,8 @@
 package com.agromercado.accounts.cmd.infrastructure.persistence.adapter;
 
+import java.time.Instant;
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.agromercado.accounts.cmd.application.port.out.AfiliacionZonaInterface;
@@ -18,7 +21,14 @@ public class AfiliacionZonaJpaImpl implements AfiliacionZonaInterface {
 
   @Override
   public void save(AfiliacionZona aggregate) {
-    var entity = AfiliacionZonaMapper.toEntity(aggregate);
+    var existing = repo.findById(aggregate.getAfiliacionId().value());
+    Instant createdAt = existing.map(e -> e.getCreatedAt()).orElse(Instant.now());
+    var entity = AfiliacionZonaMapper.toEntity(aggregate, createdAt);
     repo.save(entity);
+  }
+
+  @Override
+  public Optional<AfiliacionZona> findById(String afiliacionId) {
+    return repo.findById(afiliacionId).map(AfiliacionZonaMapper::toAggregate);
   }
 }

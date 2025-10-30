@@ -5,6 +5,7 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
@@ -41,4 +42,13 @@ public class AuthDevController {
 
     return Map.of("access_token", jwt, "token_type", "Bearer", "expires_in", ttl);
   }
+
+  @GetMapping("/auth/me")
+  public Map<String, Object> me(@AuthenticationPrincipal Jwt jwt) {
+    return Map.of(
+      "userId", jwt.getSubject(),
+      "roles", jwt.getClaimAsStringList("roles")
+    );
+  }
+
 }

@@ -37,6 +37,20 @@ public class AfiliacionZona {
     this.version = 1;
   }
 
+  public static AfiliacionZona rehydrate(
+      AfiliacionId afiliacionId,
+      ZonaId zonaId,
+      String solicitanteUsuarioId,
+      DatosZona datosZona,
+      EstadoAfiliacion estado,
+      int version
+  ) {
+    var agg = new AfiliacionZona(afiliacionId, zonaId, solicitanteUsuarioId, datosZona);
+    agg.estado = estado;
+    agg.version = version;
+    return agg;
+  }
+
   /** HU01: crear afiliación en PENDIENTE y elevar AfiliacionSolicitada. */
   public static AfiliacionZona solicitar(String solicitanteUsuarioId, DatosZona datos, DomainEvents factory) {
     if (solicitanteUsuarioId == null || solicitanteUsuarioId.isBlank())

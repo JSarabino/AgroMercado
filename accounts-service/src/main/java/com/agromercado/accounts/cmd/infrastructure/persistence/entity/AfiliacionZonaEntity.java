@@ -3,7 +3,11 @@ package com.agromercado.accounts.cmd.infrastructure.persistence.entity;
 import java.time.Instant;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "afiliaciones_zona")
 public class AfiliacionZonaEntity {
@@ -45,7 +49,7 @@ public class AfiliacionZonaEntity {
   @Column(name = "version", nullable = false)
   private int version;
 
-  @Column(name = "created_at", nullable = false)
+  @Column(name = "created_at", updatable = false, nullable = false)
   private Instant createdAt;
 
   protected AfiliacionZonaEntity() {}

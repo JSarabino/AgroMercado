@@ -23,42 +23,32 @@ public class AfiliacionZonaProjector {
   private final Clock clock = Clock.systemUTC();
 
   public AfiliacionZonaProjector(AfiliacionZonaViewRepository viewRepo,
-      ProcessedEventRepository processedRepo) {
+                                 ProcessedEventRepository processedRepo) {
     this.viewRepo = viewRepo;
     this.processedRepo = processedRepo;
   }
 
   @Transactional
   public void on(AfiliacionSolicitadaDTO evt) {
-    // --- tomar campos desde meta ---
     var meta = evt.meta();
     String aggregateId = meta.aggregateId();
     String zonaId = meta.zonaId();
     Integer version = meta.aggregateVersion();
-    String solicitanteId = meta.causedByUserId(); // puede venir null
+    String solicitanteId = meta.causedByUserId();
 
-    // 1) Idempotencia
-    // Si tu ProcessedEvent.eventId es UUID, convierte aquí:
-    // if (processedRepo.findByEventId(UUID.fromString(evt.eventId())).isPresent())
-    // return;
-    if (processedRepo.findByEventId(evt.eventId()).isPresent())
-      return;
+    if (processedRepo.findByEventId(evt.eventId()).isPresent()) return;
 
-    // 2) Cargar vista actual (si existe)
     AfiliacionZonaView current = viewRepo.findById(aggregateId).orElse(null);
 
-    // 3) Control de versión
     if (!ProjectionVersioning.isNewer(version, current)) {
-      processedRepo.save(new ProcessedEvent(
-          evt.eventId(), aggregateId, "AfiliacionSolicitada", Instant.now(clock)));
+      processedRepo.save(new ProcessedEvent(evt.eventId(), aggregateId, "AfiliacionSolicitada", Instant.now(clock)));
       return;
     }
 
-    // 4) Upsert de la vista
     AfiliacionZonaView view = (current != null) ? current : new AfiliacionZonaView();
     view.setId(aggregateId);
     view.setZonaId(zonaId);
-    view.setSolicitanteUsuarioId(solicitanteId); // puede quedar null
+    view.setSolicitanteUsuarioId(solicitanteId);
     view.setEstado("PENDIENTE");
 
     view.setNombreVereda(evt.nombreVereda());
@@ -72,9 +62,75 @@ public class AfiliacionZonaProjector {
     view.setUpdatedAt(Instant.now(clock));
 
     viewRepo.save(view);
+    processedRepo.save(new ProcessedEvent(evt.eventId(), aggregateId, "AfiliacionSolicitada", Instant.now(clock)));
+  }
 
-    // 5) Marcar procesado
-    processedRepo.save(new ProcessedEvent(
-        evt.eventId(), aggregateId, "AfiliacionSolicitada", Instant.now(clock)));
+  @Transactional
+  public void onAprobada(com.agromercado.accounts.sync.contracts.AfiliacionAprobadaMsg evt) {
+    var meta = evt.meta();
+    String eventId = evt.eventId();
+    String afiliacionId = evt.afiliacionId();
+    Integer version = meta.aggregateVersion();
+
+    if (processedRepo.findByEventId(eventId).isPresent()) return;
+
+    AfiliacionZonaView current = viewRepo.findById(afiliacionId)
+        .orElseThrow(() -> new ProyectionException("View no encontrada: " + afiliacionId));
+
+    if (!ProjectionVersioning.isNewer(version, current)) {
+      processedRepo.save(new ProcessedEvent(eventId, afiliacionId, "AfiliacionAprobada", Instant.now(clock)));
+      return;
+    }
+
+    current.setEstado("APROBADA");
+    current.setVersion(version);
+    current.setUpdatedAt(evt.occurredAt());
+
+    viewRepo.save(current);
+    processedRepo.save(new ProcessedEvent(eventId, afiliacionId, "AfiliacionAprobada", Instant.now(clock)));
+  }
+
+  @Transactional
+  public void onRechazada(com.agromercado.accounts.sync.contracts.AfiliacionRechazadaMsg evt) {
+    var meta = evt.meta();
+    String eventId = evt.eventId();
+    String afiliacionId = evt.afiliacionId();
+    Integer version = meta.aggregateVersion();
+
+    if (processedRepo.findByEventId(eventId).isPresent()) return;
+
+    AfiliacionZonaView current = viewRepo.findById(afiliacionId)
+        .orElseThrow(() -> new ProyectionException("View no encontrada: " + afiliacionId));
+
+    if (!ProjectionVersioning.isNewer(version, current)) {
+      processedRepo.save(new ProcessedEvent(eventId, afiliacionId, "AfiliacionRechazada", Instant.now(clock)));
+      return;
+    }
+
+    current.setEstado("RECHAZADA");
+    current.setVersion(version);
+    current.setUpdatedAt(evt.occurredAt());
+
+    viewRepo.save(current);
+    processedRepo.save(new ProcessedEvent(eventId, afiliacionId, "AfiliacionRechazada", Instant.now(clock)));
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
