@@ -28,6 +28,31 @@ export interface DecodedToken {
   exp: number;
 }
 
+// Interfaces para login y registro
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  tokenType: string;
+  expiresIn: number;
+  usuarioId: string;
+  email: string;
+  nombre: string;
+  tipoUsuario: string;
+  rolesGlobales: string[];
+  membresias: string[];
+}
+
+export interface RegisterResponse {
+  usuarioId: string;
+  email: string;
+  nombre: string;
+  mensaje: string;
+}
+
 class AuthService {
   /**
    * Genera un token de desarrollo usando el endpoint /auth/dev/token
@@ -111,8 +136,8 @@ class AuthService {
    * Mapea roles del backend a roles del frontend
    */
   mapRoleToUserRole(roles: string[]): UserRole {
-    if (roles.includes('ADMIN_GLOBAL')) return 'admin';
-    if (roles.includes('ADMIN_ZONA')) return 'productor';
+    if (roles.includes('ADMIN_GLOBAL')) return 'admin_global';
+    if (roles.includes('ADMIN_ZONA')) return 'admin_zona';
     if (roles.includes('PRODUCTOR')) return 'productor';
     return 'cliente';
   }
@@ -135,6 +160,50 @@ class AuthService {
   }
 
   /**
+   * Login con email y password (Real)
+   */
+  async login(email: string, password: string): Promise<LoginResponse> {
+    const response = await apiService.post<LoginResponse>('/auth/login', {
+      email,
+      password
+    });
+
+    // Guardar token en localStorage
+    if (response.accessToken) {
+      this.saveToken(response.accessToken);
+      localStorage.setItem(API_CONFIG.USER_KEY, JSON.stringify(response));
+    }
+
+    return response;
+  }
+
+  /**
+   * Registro de nuevo usuario
+   */
+  async register(nombre: string, email: string, password: string, tipoUsuario: string): Promise<RegisterResponse> {
+    const response = await apiService.post<RegisterResponse>('/cmd/usuarios', {
+      nombre,
+      email,
+      password,
+      tipoUsuario
+    });
+    return response;
+  }
+
+  /**
+   * Obtener usuario almacenado
+   */
+  getStoredUser(): LoginResponse | null {
+    const userStr = localStorage.getItem(API_CONFIG.USER_KEY);
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
    * Login simulado para desarrollo - genera token con roles específicos
    * En producción, esto debería llamar a un endpoint de login real
    */
@@ -143,11 +212,14 @@ class AuthService {
     let backendRoles: string[] = [];
 
     switch (role) {
-      case 'admin':
+      case 'admin_global':
         backendRoles = ['ADMIN_GLOBAL'];
         break;
+      case 'admin_zona':
+        backendRoles = ['ADMIN_ZONA'];
+        break;
       case 'productor':
-        backendRoles = ['PRODUCTOR', 'ADMIN_ZONA'];
+        backendRoles = ['PRODUCTOR'];
         break;
       case 'cliente':
         backendRoles = [];
@@ -167,4 +239,6 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+const authService = new AuthService();
+export default authService;
+export { authService };

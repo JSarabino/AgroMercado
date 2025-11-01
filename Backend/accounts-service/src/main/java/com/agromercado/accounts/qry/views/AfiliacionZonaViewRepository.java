@@ -9,6 +9,9 @@ public interface AfiliacionZonaViewRepository extends MongoRepository<Afiliacion
   // Consultar por zona (HU03)
   List<AfiliacionZonaView> findByZonaId(String zonaId);
 
-  // Opcional: buscar una específica
+  // Buscar por solicitante
   List<AfiliacionZonaView> findBySolicitanteUsuarioId(String solicitanteUsuarioId);
+
+  // Buscar por estado (para listar zonas aprobadas disponibles para productores)
+  List<AfiliacionZonaView> findByEstado(String estado);
 }

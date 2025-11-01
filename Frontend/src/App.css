@@ -193,7 +193,7 @@
 
 .demo-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
 }
 
@@ -1971,5 +1971,551 @@
 
   .form-row {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   ADMIN DASHBOARD - QUICK ACCESS
+   ============================================ */
+
+.quick-access-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.quick-access-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px var(--shadow);
+  border-left: 4px solid;
+}
+
+.quick-access-card.primary {
+  border-color: var(--primary);
+}
+
+.quick-access-card.secondary {
+  border-color: var(--secondary);
+}
+
+.quick-access-card.accent {
+  border-color: #8b5cf6;
+}
+
+.quick-access-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px var(--shadow-lg);
+}
+
+.quick-access-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.quick-access-card.primary .quick-access-icon {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.quick-access-card.secondary .quick-access-icon {
+  background: linear-gradient(135deg, var(--secondary) 0%, #2563eb 100%);
+}
+
+.quick-access-card.accent .quick-access-icon {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.quick-access-content {
+  flex: 1;
+}
+
+.quick-access-content h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+}
+
+.quick-access-content p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.quick-access-badge {
+  display: inline-block;
+  background: var(--warning);
+  color: #92400e;
+  padding: 0.375rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .quick-access-section {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-access-card {
+    padding: 1.5rem;
+  }
+
+  .quick-access-icon {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* ============================================
+   ADMIN AFILIACIONES Y PRODUCTORES
+   ============================================ */
+
+.admin-afiliaciones-page,
+.admin-productores-page {
+  padding: 2rem 0;
+}
+
+/* Page Header Específico */
+.admin-afiliaciones-page .page-header,
+.admin-productores-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Filters Bar */
+.admin-afiliaciones-page .filters-bar,
+.admin-productores-page .filters-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.admin-afiliaciones-page .filters-bar button,
+.admin-productores-page .filters-bar button {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-afiliaciones-page .filters-bar button:hover,
+.admin-productores-page .filters-bar button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.admin-afiliaciones-page .filters-bar button.active,
+.admin-productores-page .filters-bar button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Afiliaciones Grid */
+.afiliaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.afiliacion-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.afiliacion-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px var(--shadow-lg);
+}
+
+.afiliacion-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.afiliacion-card .card-body {
+  padding: 1.5rem;
+}
+
+.afiliacion-card .card-body h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.afiliacion-card .municipio {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.afiliacion-card .card-actions {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  text-align: right;
+}
+
+/* Solicitudes List */
+.solicitudes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.solicitud-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  transition: all 0.3s ease;
+}
+
+.solicitud-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 20px var(--shadow-lg);
+}
+
+.solicitud-card .card-left {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex: 1;
+}
+
+.solicitud-card .card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.user-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.user-info h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.contact-info span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+/* Button Success/Danger */
+.btn-success {
+  background: var(--success);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Modal específico para admin */
+.admin-afiliaciones-page .modal-header h2,
+.admin-productores-page .modal-header h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Alert */
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 0.75rem;
+  border-left: 4px solid;
+  margin-top: 1.5rem;
+}
+
+.alert-info {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+}
+
+.alert ul {
+  margin: 0.5rem 0 0 1.5rem;
+}
+
+.alert li {
+  margin: 0.25rem 0;
+}
+
+/* Responsive Admin */
+@media (max-width: 768px) {
+  .afiliaciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .solicitud-card {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .solicitud-card .card-left {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .solicitud-card .card-right {
+    align-items: stretch;
+  }
+}
+
+/* ============================================
+   SOLICITAR AFILIACIÓN
+   ============================================ */
+
+.solicitar-afiliacion-page {
+  padding: 2rem 0;
+}
+
+.solicitar-afiliacion-page .page-header {
+  margin-bottom: 2rem;
+}
+
+.solicitar-afiliacion-page .page-header h1 {
+  margin: 1rem 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.solicitar-afiliacion-page .page-header p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+  gap: 0.75rem;
+}
+
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.afiliacion-form {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.form-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--border);
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1.5rem;
+}
+
+.form-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.form-group .required {
+  color: var(--danger);
+}
+
+.form-group input {
+  padding: 0.875rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.form-group input:disabled {
+  background: var(--bg-secondary);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid var(--border);
+}
+
+@media (max-width: 768px) {
+  .form-container {
+    padding: 0;
+  }
+
+  .afiliacion-form {
+    padding: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
   }
 }

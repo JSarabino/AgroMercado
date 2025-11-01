@@ -27,6 +27,28 @@ class ApiService {
           config.headers['X-Tenant-Id'] = API_CONFIG.DEFAULT_TENANT;
         }
 
+        // Agregar información del usuario (ID y roles) para autorización en el backend
+        const userStr = localStorage.getItem(API_CONFIG.USER_KEY);
+        if (userStr && config.headers) {
+          try {
+            const user = JSON.parse(userStr);
+
+            // Enviar ID del usuario
+            if (user.id) {
+              config.headers['X-User-Id'] = user.id;
+            }
+
+            // Enviar rol del usuario (mapear el rol del frontend al formato del backend)
+            if (user.role) {
+              // Convertir el rol a mayúsculas para que coincida con el enum del backend
+              const backendRole = user.role.toUpperCase();
+              config.headers['X-User-Roles'] = backendRole;
+            }
+          } catch (error) {
+            console.error('Error parsing user from localStorage:', error);
+          }
+        }
+
         return config;
       },
       (error) => {

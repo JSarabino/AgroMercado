@@ -1,9 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { mockEstadisticas } from '../data/mockData';
-import { Users, ShoppingBag, DollarSign, Activity } from 'lucide-react';
+import { Users, ShoppingBag, DollarSign, Activity, FileText, UserCog } from 'lucide-react';
+import afiliacionesService from '../services/afiliaciones.service';
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const stats = mockEstadisticas;
+  const [tieneZonaAprobada, setTieneZonaAprobada] = useState(false);
+  const [cargandoAfiliaciones, setCargandoAfiliaciones] = useState(true);
+
+  // Verificar si el Admin Zona tiene una afiliación aprobada
+  useEffect(() => {
+    const verificarAfiliacion = async () => {
+      if (user?.role === 'admin_zona' && user?.id) {
+        try {
+          setCargandoAfiliaciones(true);
+          const solicitudes = await afiliacionesService.listarMisSolicitudes(user.id);
+
+          // Verificar si tiene al menos una afiliación aprobada
+          const tieneAprobada = solicitudes.some(
+            (solicitud) => solicitud.estado === 'APROBADA'
+          );
+
+          setTieneZonaAprobada(tieneAprobada);
+        } catch (error) {
+          console.error('Error verificando afiliaciones:', error);
+          setTieneZonaAprobada(false);
+        } finally {
+          setCargandoAfiliaciones(false);
+        }
+      } else {
+        setCargandoAfiliaciones(false);
+      }
+    };
+
+    verificarAfiliacion();
+  }, [user]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -13,6 +48,11 @@ const AdminDashboard: React.FC = () => {
     }).format(price);
   };
 
+  // Debug: ver qué rol tiene el usuario
+  console.log('Usuario en AdminDashboard:', user);
+  console.log('Rol del usuario:', user?.role);
+  console.log('Tiene zona aprobada:', tieneZonaAprobada);
+
   return (
     <div className="dashboard-page admin-dashboard">
       <div className="dashboard-header">
@@ -21,6 +61,85 @@ const AdminDashboard: React.FC = () => {
           <button className="btn-secondary">Exportar Reportes</button>
           <button className="btn-primary">Configuración</button>
         </div>
+      </div>
+
+      {/* Accesos rápidos */}
+      <div className="quick-access-section">
+        {user?.role === 'admin_global' && (
+          <div
+            className="quick-access-card primary"
+            onClick={() => navigate('/admin/afiliaciones')}
+          >
+            <div className="quick-access-icon">
+              <FileText size={32} />
+            </div>
+            <div className="quick-access-content">
+              <h3>Gestionar Solicitudes de Afiliaciones de Zonas</h3>
+              <p>Aprobar o rechazar solicitudes de nuevas zonas enviadas por Administradores Zonales</p>
+              <span className="quick-access-badge">3 pendientes</span>
+            </div>
+          </div>
+        )}
+
+        {user?.role === 'admin_zona' && (
+          <>
+            <div
+              className="quick-access-card primary"
+              onClick={() => navigate('/admin/solicitar-afiliacion')}
+            >
+              <div className="quick-access-icon">
+                <FileText size={32} />
+              </div>
+              <div className="quick-access-content">
+                <h3>Solicitar Afiliación de Zona</h3>
+                <p>Enviar solicitud de nueva zona al Administrador Global para su aprobación</p>
+              </div>
+            </div>
+
+            <div
+              className="quick-access-card info"
+              onClick={() => navigate('/admin/mis-solicitudes')}
+            >
+              <div className="quick-access-icon">
+                <Activity size={32} />
+              </div>
+              <div className="quick-access-content">
+                <h3>Ver Estado de Solicitudes</h3>
+                <p>Revisa el estado de tus solicitudes de afiliación de zonas</p>
+              </div>
+            </div>
+
+            {/* Solo mostrar si tiene una zona aprobada */}
+            {!cargandoAfiliaciones && tieneZonaAprobada && (
+              <div
+                className="quick-access-card secondary"
+                onClick={() => navigate('/admin/productores')}
+              >
+                <div className="quick-access-icon">
+                  <UserCog size={32} />
+                </div>
+                <div className="quick-access-content">
+                  <h3>Gestión de Productores</h3>
+                  <p>Aprobar o rechazar solicitudes de productores</p>
+                  <span className="quick-access-badge">2 pendientes</span>
+                </div>
+              </div>
+            )}
+
+            {/* Mensaje cuando no tiene zona aprobada */}
+            {!cargandoAfiliaciones && !tieneZonaAprobada && (
+              <div className="quick-access-card disabled" style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                <div className="quick-access-icon">
+                  <UserCog size={32} />
+                </div>
+                <div className="quick-access-content">
+                  <h3>Gestión de Productores</h3>
+                  <p>⚠️ Necesitas tener una zona aprobada para acceder a esta funcionalidad</p>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className="stats-grid">

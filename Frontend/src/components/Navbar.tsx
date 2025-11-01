@@ -11,7 +11,8 @@ import {
   Package,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  FileText
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
@@ -29,7 +30,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to={user?.role === 'admin' ? '/admin' : user?.role === 'productor' ? '/productor' : '/catalogo'} className="navbar-logo">
+        <Link to={user?.role === 'admin_global' || user?.role === 'admin_zona' ? '/admin' : user?.role === 'productor' ? '/productor' : '/catalogo'} className="navbar-logo">
           <Sprout size={28} />
           <span>AgroMercado</span>
         </Link>
@@ -62,6 +63,10 @@ const Navbar: React.FC = () => {
                 <LayoutDashboard size={18} />
                 Dashboard
               </Link>
+              <Link to="/productor/solicitar-afiliacion" className="navbar-link">
+                <FileText size={18} />
+                Solicitar Afiliación
+              </Link>
               <Link to="/productor/productos" className="navbar-link">
                 <Package size={18} />
                 Mis Productos
@@ -73,15 +78,30 @@ const Navbar: React.FC = () => {
             </>
           )}
 
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin_global' || user?.role === 'admin_zona') && (
             <>
               <Link to="/admin" className="navbar-link">
                 <LayoutDashboard size={18} />
                 Dashboard
               </Link>
-              <Link to="/admin/productores" className="navbar-link">
-                Productores
-              </Link>
+
+              {user?.role === 'admin_global' && (
+                <Link to="/admin/afiliaciones" className="navbar-link">
+                  Afiliaciones
+                </Link>
+              )}
+
+              {user?.role === 'admin_zona' && (
+                <>
+                  <Link to="/admin/productores" className="navbar-link">
+                    Productores
+                  </Link>
+                  <Link to="/admin/solicitar-afiliacion" className="navbar-link">
+                    Solicitar Zona
+                  </Link>
+                </>
+              )}
+
               <Link to="/admin/productos" className="navbar-link">
                 Productos
               </Link>

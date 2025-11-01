@@ -20,8 +20,11 @@ export const API_ENDPOINTS = {
 
   // Afiliaciones
   AFILIACIONES_SOLICITAR: '/cmd/afiliaciones/solicitar',
+  AFILIACIONES_PRODUCTOR_SOLICITAR: '/cmd/afiliaciones/productor/solicitar',
   AFILIACIONES_APROBAR: (id: string) => `/cmd/afiliaciones/${id}/aprobar`,
   AFILIACIONES_RECHAZAR: (id: string) => `/cmd/afiliaciones/${id}/rechazar`,
+  AFILIACIONES_PRODUCTOR_APROBAR: (id: string) => `/cmd/afiliaciones/productor/${id}/aprobar`,
+  AFILIACIONES_PRODUCTOR_RECHAZAR: (id: string) => `/cmd/afiliaciones/productor/${id}/rechazar`,
   AFILIACIONES_QUERY: '/qry/afiliaciones',
 
   // Productos (a través de Gateway)

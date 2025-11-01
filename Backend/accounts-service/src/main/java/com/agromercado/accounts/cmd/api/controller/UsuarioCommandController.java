@@ -41,7 +41,7 @@ public class UsuarioCommandController {
   // Crea usuario "normal" (sin roles globales) - público según SecurityConfig
   @PostMapping
   public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody RegistrarUsuarioRequest body) {
-    var id = registrar.handle(new RegistrarUsuarioCommand(body.email(), body.nombre()));
+    var id = registrar.handle(new RegistrarUsuarioCommand(body.email(), body.nombre(), body.password(), body.tipoUsuario()));
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(new UsuarioResponse(id, body.email(), body.nombre(), "Usuario creado"));
   }

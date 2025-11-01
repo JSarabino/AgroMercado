@@ -29,6 +29,13 @@ public class UsuarioJpaImpl implements UsuarioInterface {
     );
   }
 
+  @Override
+  public Optional<Usuario> findByEmail(String email){
+    return userRepo.findByEmail(email).map(u ->
+      UsuarioMapper.toAggregate(u, rolRepo.findByUsuarioId(u.getUsuarioId()), membRepo.findByUsuarioId(u.getUsuarioId()))
+    );
+  }
+
   @Override public boolean existsByEmail(String email){ return userRepo.existsByEmail(email); }
 
   @Override @Transactional

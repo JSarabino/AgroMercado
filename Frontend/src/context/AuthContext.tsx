@@ -5,7 +5,7 @@ import { API_CONFIG } from '../config/api.config';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -45,30 +45,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, _password: string, role: UserRole) => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true);
 
     try {
-      // Generar token JWT usando el servicio de auth
-      const token = await authService.loginDev(email, role);
+      // Login real con el backend
+      const response = await authService.login(email, password);
 
-      // Decodificar token para obtener información
-      const tokenData = authService.decodeToken(token);
+      // Mapear tipoUsuario del backend a UserRole del frontend
+      const tipoUsuarioMap: Record<string, UserRole> = {
+        'CLIENTE': 'cliente',
+        'PRODUCTOR': 'productor',
+        'ADMIN_ZONA': 'admin_zona',
+        'ADMIN_GLOBAL': 'admin_global'
+      };
 
-      if (!tokenData) {
-        throw new Error('Token inválido');
-      }
+      const userRole = tipoUsuarioMap[response.tipoUsuario] || 'cliente';
 
-      // Crear objeto de usuario
       const newUser: User = {
-        id: tokenData.userId,
-        nombre: role === 'admin' ? 'Administrador Global' :
-                role === 'productor' ? 'Juan Pérez' :
-                'María García',
-        email,
-        role: authService.mapRoleToUserRole(tokenData.roles),
-        telefono: '3001234567',
-        direccion: role === 'cliente' ? 'Popayán, Cauca' : 'Vereda El Tablón, Popayán',
+        id: response.usuarioId,
+        nombre: response.nombre,
+        email: response.email,
+        role: userRole,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
       };
 

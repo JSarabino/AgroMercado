@@ -24,8 +24,10 @@ public class AfiliacionQueryController {
   }
 
   /**
-   * GET /qry/afiliaciones?solicitante=... | ?zonaId=...
-   * Al menos uno de los dos parámetros debe venir.
+   * GET /qry/afiliaciones?solicitante=... | ?zonaId=... | (sin params si ADMIN_GLOBAL o PRODUCTOR)
+   * - Si es ADMIN_GLOBAL sin parámetros: devuelve TODAS las afiliaciones
+   * - Si es PRODUCTOR/CLIENTE sin parámetros: devuelve solo las APROBADAS (para seleccionar zona)
+   * - Si tiene parámetros: filtra por solicitante o zonaId
    * Redacción: si el caller no es solicitante ni ADMIN_GLOBAL, ocultamos datos sensibles.
    */
   @GetMapping
@@ -35,17 +37,42 @@ public class AfiliacionQueryController {
       @RequestHeader(name = "X-User-Id", required = false) String callerUserId,
       @RequestHeader(name = "X-User-Roles", required = false) String callerRoles
   ) {
+    boolean adminGlobal = hasAdminGlobal(callerRoles);
+    boolean isProductorOrCliente = hasRole(callerRoles, "PRODUCTOR") || hasRole(callerRoles, "CLIENTE");
+
+    // Si no hay parámetros
     if ((solicitante == null || solicitante.isBlank()) && (zonaId == null || zonaId.isBlank())) {
+      // ADMIN_GLOBAL: devolver TODAS las afiliaciones
+      if (adminGlobal) {
+        List<AfiliacionZonaView> views = repo.findAll();
+        return ResponseEntity.ok(
+            views.stream()
+                 .map(mapper::toResponseFull)
+                 .toList()
+        );
+      }
+
+      // PRODUCTOR o CLIENTE: devolver solo las APROBADAS (para que puedan seleccionar zona)
+      if (isProductorOrCliente) {
+        List<AfiliacionZonaView> views = repo.findByEstado("APROBADA");
+        return ResponseEntity.ok(
+            views.stream()
+                 .map(mapper::toResponseFull)
+                 .toList()
+        );
+      }
+
+      // Otros usuarios: deben especificar parámetros
       return ResponseEntity.status(HttpStatus.BAD_REQUEST)
           .body("Debe especificar solicitante o zonaId");
     }
 
+    // Con parámetros: filtrar por solicitante o zonaId
     List<AfiliacionZonaView> views =
         (solicitante != null && !solicitante.isBlank())
             ? repo.findBySolicitanteUsuarioId(solicitante)
             : repo.findByZonaId(zonaId);
 
-    boolean adminGlobal = hasAdminGlobal(callerRoles);
     return ResponseEntity.ok(
         views.stream()
              .map(v -> canSeeFull(v, callerUserId, adminGlobal)
@@ -85,10 +112,14 @@ public class AfiliacionQueryController {
   }
 
   private boolean hasAdminGlobal(String rolesHeader) {
-    if (rolesHeader == null) return false;
-    // Ejemplo: "USER,ADMIN_GLOBAL" o "ADMIN_GLOBAL"
+    return hasRole(rolesHeader, "ADMIN_GLOBAL");
+  }
+
+  private boolean hasRole(String rolesHeader, String roleName) {
+    if (rolesHeader == null || roleName == null) return false;
+    // Ejemplo: "USER,ADMIN_GLOBAL" o "ADMIN_GLOBAL" o "PRODUCTOR"
     for (String r : rolesHeader.split(",")) {
-      if ("ADMIN_GLOBAL".equalsIgnoreCase(r.trim())) return true;
+      if (roleName.equalsIgnoreCase(r.trim())) return true;
     }
     return false;
   }

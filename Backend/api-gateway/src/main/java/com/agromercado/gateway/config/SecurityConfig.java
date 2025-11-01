@@ -25,19 +25,18 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeExchange(exchanges -> exchanges
-                // Rutas públicas
-                .pathMatchers(HttpMethod.POST, "/auth/dev/token").permitAll()
+                // Rutas públicas - Auth y Registro
+                .pathMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                .pathMatchers(HttpMethod.GET, "/auth/**").permitAll()
                 .pathMatchers(HttpMethod.POST, "/cmd/usuarios").permitAll()
-                .pathMatchers(HttpMethod.POST, "/accounts/cmd/usuarios").permitAll()
-                .pathMatchers(HttpMethod.POST, "/accounts/auth/dev/token").permitAll()
 
                 // Actuator y Eureka
                 .pathMatchers("/actuator/**").permitAll()
                 .pathMatchers("/eureka/**").permitAll()
 
-                // Productos - requiere autenticación
+                // Productos - público para leer, autenticado para escribir
+                .pathMatchers(HttpMethod.GET, "/productos/**").permitAll()
                 .pathMatchers("/productos/**").authenticated()
-                .pathMatchers("/api/productos/**").authenticated()
 
                 // Todo lo demás requiere autenticación
                 .anyExchange().authenticated()

@@ -25,7 +25,7 @@ spring:
   # === Mongo ===
   data:
     mongodb:
-      uri: mongodb://localhost:27017/accounts_qry
+      uri: mongodb://root:root@localhost:27017/accounts_qry?authSource=admin
       database: accounts_qry
 
   # Asegura ISO8601 y no timestamps en application.yml:

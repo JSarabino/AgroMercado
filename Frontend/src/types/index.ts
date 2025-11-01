@@ -1,6 +1,6 @@
 // Tipos y interfaces para toda la aplicación
 
-export type UserRole = 'cliente' | 'productor' | 'admin';
+export type UserRole = 'cliente' | 'productor' | 'admin_global' | 'admin_zona';
 
 export interface User {
   id: string;
@@ -10,6 +10,7 @@ export interface User {
   telefono?: string;
   direccion?: string;
   avatar?: string;
+  membresia?: string[];
 }
 
 export interface Productor extends User {

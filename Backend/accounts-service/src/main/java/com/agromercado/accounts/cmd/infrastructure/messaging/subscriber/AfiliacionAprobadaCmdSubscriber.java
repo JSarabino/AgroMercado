@@ -1,5 +1,7 @@
 package com.agromercado.accounts.cmd.infrastructure.messaging.subscriber;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.Message;
@@ -14,6 +16,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AfiliacionAprobadaCmdSubscriber {
+
+  private static final Logger log = LoggerFactory.getLogger(AfiliacionAprobadaCmdSubscriber.class);
 
   private final ObjectMapper mapper;
   private final OtorgarMembresiaZonalHandler handler;
@@ -43,8 +47,34 @@ public class AfiliacionAprobadaCmdSubscriber {
           RolZonal.ADMIN_ZONA,
           evt.meta().causedByUserId()
       ));
+      log.debug("Membresía zonal otorgada exitosamente para usuario {} en zona {}",
+                evt.solicitanteUsuarioId(), evt.zonaId());
+    } catch (IllegalArgumentException ex) {
+      // Usuario no existe - probablemente un mensaje viejo/huérfano
+      log.warn("No se pudo otorgar membresía: {}. Usuario={}, Zona={}",
+               ex.getMessage(),
+               extractUsuarioId(json),
+               extractZonaId(json));
+      // NO relanza la excepción - el mensaje se considera procesado
     } catch (Exception ex) {
+      log.error("Error crítico procesando AfiliacionAprobada: {}", json, ex);
       throw new RuntimeException("Error otorgando membresía por AfiliacionAprobada", ex);
+    }
+  }
+
+  private String extractUsuarioId(String json) {
+    try {
+      return mapper.readTree(json).path("solicitanteUsuarioId").asText("unknown");
+    } catch (Exception e) {
+      return "unknown";
+    }
+  }
+
+  private String extractZonaId(String json) {
+    try {
+      return mapper.readTree(json).path("zonaId").asText("unknown");
+    } catch (Exception e) {
+      return "unknown";
     }
   }
 }

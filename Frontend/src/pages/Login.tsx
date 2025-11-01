@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import type { UserRole } from '../types';
-import { Sprout, Mail, Lock, User } from 'lucide-react';
+import { Sprout, Mail, Lock } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('cliente');
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -22,17 +20,11 @@ const Login: React.FC = () => {
     }
 
     try {
-      await login(email, password, role);
-      // Redirigir según el rol
-      if (role === 'admin') {
-        navigate('/admin');
-      } else if (role === 'productor') {
-        navigate('/productor');
-      } else {
-        navigate('/catalogo');
-      }
+      await login(email, password);
+      // La redirección se maneja automáticamente por el App.tsx según el rol del usuario
+      navigate('/');
     } catch {
-      setError('Error al iniciar sesión');
+      setError('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
     }
   };
 
@@ -87,23 +79,6 @@ const Login: React.FC = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="role">
-                <User size={18} />
-                Tipo de Usuario
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value as UserRole)}
-                disabled={isLoading}
-              >
-                <option value="cliente">Cliente (Comprador)</option>
-                <option value="productor">Productor (Vendedor)</option>
-                <option value="admin">Administrador</option>
-              </select>
-            </div>
-
             <button
               type="submit"
               className="btn-primary"
@@ -113,27 +88,9 @@ const Login: React.FC = () => {
             </button>
 
             <div className="login-footer">
-              <p>¿No tienes cuenta? <a href="#registro">Regístrate aquí</a></p>
+              <p>¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link></p>
             </div>
           </form>
-
-          <div className="demo-info">
-            <h4>🌱 Demo - Acceso rápido:</h4>
-            <div className="demo-cards">
-              <div className="demo-card" onClick={() => { setEmail('cliente@demo.com'); setRole('cliente'); }}>
-                <strong>Cliente</strong>
-                <small>Compra productos</small>
-              </div>
-              <div className="demo-card" onClick={() => { setEmail('productor@demo.com'); setRole('productor'); }}>
-                <strong>Productor</strong>
-                <small>Vende productos</small>
-              </div>
-              <div className="demo-card" onClick={() => { setEmail('admin@demo.com'); setRole('admin'); }}>
-                <strong>Admin</strong>
-                <small>Gestiona plataforma</small>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

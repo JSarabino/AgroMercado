@@ -13,11 +13,13 @@ public final class UsuarioMapper {
   private UsuarioMapper() {}
 
   public static UsuarioEntity toUsuarioEntity(Usuario agg){
-    // Usa el ctor público (id, email, nombre, estado, createdAt)
+    // Usa el ctor público (id, email, nombre, passwordHash, tipoUsuario, estado, createdAt)
     return new UsuarioEntity(
         agg.getUsuarioId(),
         agg.getEmail(),
         agg.getNombre(),
+        agg.getPasswordHash(),
+        agg.getTipoUsuario(),
         agg.getEstado(),
         Instant.now()   // created_at
     );
@@ -46,7 +48,7 @@ public final class UsuarioMapper {
   public static Usuario toAggregate(UsuarioEntity base,
                                     Collection<UsuarioRolGlobalEntity> roles,
                                     Collection<UsuarioMembresiaEntity> membresias){
-    var u = new UsuarioReflector(base.getUsuarioId(), base.getEmail(), base.getNombre(), base.getEstadoUsuario());
+    var u = new UsuarioReflector(base.getUsuarioId(), base.getEmail(), base.getNombre(), base.getPasswordHash(), base.getTipoUsuario(), base.getEstadoUsuario());
     roles.forEach(r -> u.rolesGlobales.add(r.getRolGlobal()));
     membresias.forEach(m ->
         u.membresias.put(
@@ -64,21 +66,22 @@ public final class UsuarioMapper {
 
   /** Helper para reconstrucción sin ctor público en el agregado */
   private static class UsuarioReflector {
-    private final String id; private final String email; private final String nombre; private final String estado;
+    private final String id; private final String email; private final String nombre; private final String passwordHash;
+    private final com.agromercado.accounts.cmd.domain.enum_.TipoUsuario tipoUsuario; private final String estado;
     private final java.util.Set<String> rolesGlobales = new java.util.HashSet<>();
     private final java.util.Map<String, Usuario.Membresia> membresias = new java.util.HashMap<>();
-    UsuarioReflector(String id, String email, String nombre, String estado){
-      this.id=id; this.email=email; this.nombre=nombre; this.estado=estado;
+    UsuarioReflector(String id, String email, String nombre, String passwordHash, com.agromercado.accounts.cmd.domain.enum_.TipoUsuario tipoUsuario, String estado){
+      this.id=id; this.email=email; this.nombre=nombre; this.passwordHash=passwordHash; this.tipoUsuario=tipoUsuario; this.estado=estado;
     }
     Usuario build(){
-      var u = new UsuarioProxy(id, email, nombre, estado); // usa ctor protected del agregado
+      var u = new UsuarioProxy(id, email, nombre, passwordHash, tipoUsuario, estado); // usa ctor protected del agregado
       u.getRolesGlobales().addAll(rolesGlobales);
       u.getMembresias().putAll(membresias);
       return u;
     }
     private static class UsuarioProxy extends Usuario {
-      public UsuarioProxy(String id, String email, String nombre, String estado){
-        super(id, email, nombre, estado);
+      public UsuarioProxy(String id, String email, String nombre, String passwordHash, com.agromercado.accounts.cmd.domain.enum_.TipoUsuario tipoUsuario, String estado){
+        super(id, email, nombre, passwordHash, tipoUsuario, estado);
       }
     }
   }

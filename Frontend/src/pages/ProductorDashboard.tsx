@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { mockProductos, mockPedidos } from '../data/mockData';
-import { TrendingUp, Package, ShoppingCart, DollarSign, Plus } from 'lucide-react';
+import { TrendingUp, Package, ShoppingCart, DollarSign, Plus, FileText, Activity } from 'lucide-react';
 
 const ProductorDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [showAddProduct, setShowAddProduct] = useState(false);
 
   // Datos del productor (simulados)
@@ -25,9 +27,39 @@ const ProductorDashboard: React.FC = () => {
     <div className="dashboard-page">
       <div className="dashboard-header">
         <h1>Panel de Productor</h1>
-        <button className="btn-primary" onClick={() => setShowAddProduct(true)}>
-          <Plus size={20} />
-          Agregar Producto
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <button className="btn-secondary" onClick={() => navigate('/productor/solicitar-afiliacion')}>
+            <FileText size={20} />
+            Solicitar Afiliación a Zona
+          </button>
+          <button className="btn-secondary" onClick={() => navigate('/productor/mis-solicitudes')}>
+            <Activity size={20} />
+            Ver Mis Solicitudes
+          </button>
+          <button className="btn-primary" onClick={() => setShowAddProduct(true)}>
+            <Plus size={20} />
+            Agregar Producto
+          </button>
+        </div>
+      </div>
+
+      {/* Alerta si no está afiliado */}
+      <div className="alert alert-info" style={{ marginBottom: '2rem' }}>
+        <strong>⚠️ Importante:</strong> Para poder publicar productos, primero debes estar afiliado a una zona productiva.
+        <button
+          onClick={() => navigate('/productor/solicitar-afiliacion')}
+          style={{
+            marginLeft: '1rem',
+            padding: '0.5rem 1rem',
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+            fontWeight: 600
+          }}
+        >
+          Solicitar Ahora
         </button>
       </div>
 
