@@ -2,6 +2,8 @@ package com.agromercado.gateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -16,6 +18,7 @@ import java.util.List;
 public class CorsConfig {
 
     @Bean
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
@@ -23,10 +26,7 @@ public class CorsConfig {
         corsConfiguration.setAllowCredentials(true);
 
         // Orígenes permitidos
-        corsConfiguration.setAllowedOrigins(List.of(
-            "http://localhost:5173",
-            "http://localhost:3000"
-        ));
+        corsConfiguration.setAllowedOriginPatterns(Arrays.asList("*"));
 
         // Métodos HTTP permitidos
         corsConfiguration.setAllowedMethods(Arrays.asList(
@@ -34,7 +34,7 @@ public class CorsConfig {
         ));
 
         // Headers permitidos
-        corsConfiguration.setAllowedHeaders(List.of("*"));
+        corsConfiguration.setAllowedHeaders(Arrays.asList("*"));
 
         // Headers expuestos
         corsConfiguration.setExposedHeaders(Arrays.asList(

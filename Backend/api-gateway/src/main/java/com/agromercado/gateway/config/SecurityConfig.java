@@ -1,59 +1,52 @@
 package com.agromercado.gateway.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.NimbusReactiveJwtDecoder;
-import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 
-import javax.crypto.spec.SecretKeySpec;
-
+/**
+ * Configuración de seguridad para API Gateway
+ */
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    @Value("${app.jwt.dev.secret}")
-    private String jwtSecret;
-
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        http
+        return http
+            // Deshabilitar CSRF para APIs REST
             .csrf(csrf -> csrf.disable())
+
+            // Configurar autorización
             .authorizeExchange(exchanges -> exchanges
-                // Rutas públicas - Auth y Registro
-                .pathMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                .pathMatchers(HttpMethod.GET, "/auth/**").permitAll()
-                .pathMatchers(HttpMethod.POST, "/cmd/usuarios").permitAll()
+                // Permitir todas las peticiones OPTIONS (CORS preflight)
+                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Actuator y Eureka
-                .pathMatchers("/actuator/**").permitAll()
-                .pathMatchers("/eureka/**").permitAll()
+                // Permitir acceso público a endpoints de autenticación
+                .pathMatchers("/auth/**").permitAll()
 
-                // Productos - público para leer, autenticado para escribir
-                .pathMatchers(HttpMethod.GET, "/productos/**").permitAll()
-                .pathMatchers("/productos/**").authenticated()
+                // Permitir acceso a Actuator y Eureka
+                .pathMatchers("/actuator/**", "/eureka/**").permitAll()
 
-                // Todo lo demás requiere autenticación
+                // DESARROLLO: Permitir acceso a endpoints cmd y qry
+                .pathMatchers("/cmd/**", "/qry/**").permitAll()
+
+                // DESARROLLO: Permitir acceso a productos
+                .pathMatchers("/productos/**").permitAll()
+
+                // Todas las demás peticiones requieren autenticación
                 .anyExchange().authenticated()
             )
-            .oauth2ResourceServer(oauth2 -> oauth2
-                .jwt(jwt -> jwt.jwtDecoder(jwtDecoder()))
-            );
 
-        return http.build();
-    }
+            // Deshabilitar la autenticación HTTP Basic predeterminada
+            .httpBasic(httpBasic -> httpBasic.disable())
 
-    @Bean
-    public ReactiveJwtDecoder jwtDecoder() {
-        var key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
-        return NimbusReactiveJwtDecoder
-            .withSecretKey(key)
-            .macAlgorithm(MacAlgorithm.HS256)
+            // Deshabilitar el formulario de login predeterminado
+            .formLogin(formLogin -> formLogin.disable())
+
             .build();
     }
 }
