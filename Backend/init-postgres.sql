@@ -4,6 +4,8 @@
 -- Base de datos para accounts-service (CQRS Command)
 CREATE DATABASE accounts_cmd;
 
+-- Base de datos para productos-service
+CREATE DATABASE productos_db;
+
 -- Puedes agregar más bases de datos aquí según tus necesidades
--- CREATE DATABASE productos_db;
 -- CREATE DATABASE pedidos_db;

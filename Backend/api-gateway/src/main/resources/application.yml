@@ -31,7 +31,6 @@ spring:
           predicates:
             - Path=/productos/**
           filters:
-            - RewritePath=/productos/(?<segment>.*), /${segment}
             - AddRequestHeader=X-Gateway-Passed, true
 
         # Ruta directa para auth (sin reescritura)
@@ -58,23 +57,23 @@ spring:
           filters:
             - AddRequestHeader=X-Gateway-Passed, true
 
-      # Configuración global
-      globalcors:
-        corsConfigurations:
-          '[/**]':
-            allowedOrigins:
-              - "http://localhost:5173"
-              - "http://localhost:3000"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - PATCH
-              - DELETE
-              - OPTIONS
-            allowedHeaders: "*"
-            allowCredentials: true
-            maxAge: 3600
+      # Configuración global de CORS (ahora manejada por CorsConfig.java)
+      # globalcors:
+      #   corsConfigurations:
+      #     '[/**]':
+      #       allowedOrigins:
+      #         - "http://localhost:5173"
+      #         - "http://localhost:3000"
+      #       allowedMethods:
+      #         - GET
+      #         - POST
+      #         - PUT
+      #         - PATCH
+      #         - DELETE
+      #         - OPTIONS
+      #       allowedHeaders: "*"
+      #       allowCredentials: true
+      #       maxAge: 3600
 
 # === Eureka Client Configuration ===
 eureka:

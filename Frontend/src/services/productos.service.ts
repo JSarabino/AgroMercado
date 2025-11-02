@@ -1,74 +1,107 @@
 import apiService from './api.service';
-import { API_ENDPOINTS } from '../config/api.config';
-import type { Producto } from '../types';
 
-export interface ProductoDTO {
-  id: number;
+export interface Producto {
+  idProducto: number;
+  idProductor: string;
+  zonaId: string;
   nombre: string;
-  descripcion: string;
-  precio: number;
   categoria: string;
-  imagen?: string;
+  descripcion?: string;
+  stockDisponible: number;
+  unidadMedida: string;
+  precioUnitario: number;
+  imagenUrl?: string;
+  disponible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CrearProductoRequest {
+  idProductor: string;
+  zonaId: string;
+  nombre: string;
+  categoria: string;
+  descripcion?: string;
+  stockDisponible: number;
+  unidadMedida: string;
+  precioUnitario: number;
+  imagenUrl?: string;
+}
+
+export interface ActualizarProductoRequest {
+  nombre?: string;
+  categoria?: string;
+  descripcion?: string;
+  stockDisponible?: number;
+  unidadMedida?: string;
+  precioUnitario?: number;
+  imagenUrl?: string;
 }
 
 class ProductosService {
+  private readonly BASE_URL = '/productos';
+
   /**
-   * Obtiene todos los productos
-   * Requiere pasar por el Gateway (header X-Gateway-Passed: true)
+   * Obtiene todos los productos disponibles
    */
-  async listarProductos(): Promise<ProductoDTO[]> {
-    try {
-      // Intenta obtener desde el gateway
-      return await apiService.getFromGateway<ProductoDTO[]>(API_ENDPOINTS.PRODUCTOS);
-    } catch {
-      console.warn('Gateway no disponible, usando datos mock');
-      // Si falla, retorna array vacío o podrías usar los datos mock
-      return [];
-    }
+  async listarProductos(): Promise<Producto[]> {
+    return await apiService.get<Producto[]>(this.BASE_URL);
   }
 
   /**
-   * Obtiene un producto por ID
+   * Obtiene un producto por su ID
    */
-  async obtenerProducto(id: number): Promise<ProductoDTO> {
-    try {
-      return await apiService.getFromGateway<ProductoDTO>(
-        API_ENDPOINTS.PRODUCTOS_BY_ID(id)
-      );
-    } catch (error) {
-      console.error('Error obteniendo producto:', error);
-      throw error;
-    }
+  async obtenerProducto(idProducto: number): Promise<Producto> {
+    return await apiService.get<Producto>(`${this.BASE_URL}/${idProducto}`);
   }
 
   /**
-   * Convierte ProductoDTO del backend a Producto del frontend
+   * Obtiene productos de un productor específico
    */
-  mapToFrontendProduct(dto: ProductoDTO): Producto {
-    // Mapear categoría del backend a categoría del frontend
-    const categoriaMap: Record<string, Producto['categoria']> = {
-      'frutas': 'frutas',
-      'verduras': 'verduras',
-      'tuberculos': 'tubérculos',
-      'lacteos': 'lácteos',
-      'granos': 'granos',
-    };
+  async listarProductosPorProductor(idProductor: string): Promise<Producto[]> {
+    return await apiService.get<Producto[]>(`${this.BASE_URL}/productor/${idProductor}`);
+  }
 
-    return {
-      id: dto.id.toString(),
-      nombre: dto.nombre,
-      descripcion: dto.descripcion,
-      precio: dto.precio,
-      unidad: 'kg', // Por defecto, ajustar según tu lógica
-      categoria: categoriaMap[dto.categoria.toLowerCase()] || 'otros',
-      imagen: dto.imagen || 'https://via.placeholder.com/400x300',
-      productorId: 'p1', // Asignar según tu lógica
-      productorNombre: 'Productor', // Asignar según tu lógica
-      disponible: true,
-      stock: 50,
-      temporada: ['todo el año'],
-      etiquetas: ['fresco', 'local'],
-    };
+  /**
+   * Obtiene productos de una zona específica
+   */
+  async listarProductosPorZona(zonaId: string): Promise<Producto[]> {
+    return await apiService.get<Producto[]>(`${this.BASE_URL}/zona/${zonaId}`);
+  }
+
+  /**
+   * Obtiene solo los productos disponibles
+   */
+  async listarProductosDisponibles(): Promise<Producto[]> {
+    return await apiService.get<Producto[]>(`${this.BASE_URL}/disponibles`);
+  }
+
+  /**
+   * Crea un nuevo producto
+   */
+  async crearProducto(data: CrearProductoRequest): Promise<Producto> {
+    return await apiService.post<Producto>(this.BASE_URL, data);
+  }
+
+  /**
+   * Actualiza un producto existente
+   */
+  async actualizarProducto(idProducto: number, data: ActualizarProductoRequest): Promise<Producto> {
+    return await apiService.put<Producto>(`${this.BASE_URL}/${idProducto}`, data);
+  }
+
+  /**
+   * Elimina un producto
+   */
+  async eliminarProducto(idProducto: number): Promise<void> {
+    return await apiService.delete<void>(`${this.BASE_URL}/${idProducto}`);
+  }
+
+  /**
+   * Cambia el estado de disponibilidad de un producto
+   */
+  async toggleDisponibilidad(idProducto: number): Promise<Producto> {
+    return await apiService.patch<Producto>(`${this.BASE_URL}/${idProducto}/disponibilidad`);
   }
 }
 

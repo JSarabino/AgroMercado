@@ -82,6 +82,11 @@ class ApiService {
     return response.data;
   }
 
+  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const response = await this.api.put<T>(url, data, config);
+    return response.data;
+  }
+
   async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
     const response = await this.api.patch<T>(url, data, config);
     return response.data;

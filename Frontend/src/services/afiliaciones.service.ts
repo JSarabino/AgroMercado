@@ -41,6 +41,24 @@ export interface AfiliacionResumen {
   updatedAt: string;
 }
 
+export interface SolicitudProductorZona {
+  solicitudId: string;
+  zonaId: string;
+  productorUsuarioId: string;
+  nombreProductor: string;
+  documento: string;
+  telefono?: string;
+  correo?: string;
+  direccion?: string;
+  tipoProductos?: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  observaciones?: string;
+  aprobadaPor?: string;
+  fechaDecision?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 class AfiliacionesService {
   /**
    * Solicita una nueva afiliación a una zona (Admin Zona solicita crear zona)
@@ -57,7 +75,7 @@ class AfiliacionesService {
    */
   async solicitarAfiliacionProductor(data: SolicitarAfiliacionProductorRequest): Promise<AfiliacionResponse> {
     return await apiService.post<AfiliacionResponse>(
-      API_ENDPOINTS.AFILIACIONES_PRODUCTOR_SOLICITAR,
+      API_ENDPOINTS.SOLICITUDES_PRODUCTOR_SOLICITAR,
       data
     );
   }
@@ -92,11 +110,11 @@ class AfiliacionesService {
    * Aprueba una solicitud de productor (usado por ADMIN_ZONA)
    */
   async aprobarProductor(
-    afiliacionId: string,
+    solicitudId: string,
     observaciones?: string
   ): Promise<void> {
-    await apiService.patch<void>(
-      API_ENDPOINTS.AFILIACIONES_PRODUCTOR_APROBAR(afiliacionId),
+    await apiService.post<void>(
+      API_ENDPOINTS.SOLICITUDES_PRODUCTOR_APROBAR(solicitudId),
       { observaciones } as DecisionAfiliacionRequest
     );
   }
@@ -105,12 +123,32 @@ class AfiliacionesService {
    * Rechaza una solicitud de productor (usado por ADMIN_ZONA)
    */
   async rechazarProductor(
-    afiliacionId: string,
+    solicitudId: string,
     observaciones?: string
   ): Promise<void> {
-    await apiService.patch<void>(
-      API_ENDPOINTS.AFILIACIONES_PRODUCTOR_RECHAZAR(afiliacionId),
+    await apiService.post<void>(
+      API_ENDPOINTS.SOLICITUDES_PRODUCTOR_RECHAZAR(solicitudId),
       { observaciones } as DecisionAfiliacionRequest
+    );
+  }
+
+  /**
+   * Lista las solicitudes de productor para una zona (usado por ADMIN_ZONA)
+   */
+  async listarSolicitudesProductorZona(zonaId: string, estado?: string): Promise<SolicitudProductorZona[]> {
+    let url = `${API_ENDPOINTS.SOLICITUDES_PRODUCTOR_QUERY}?zonaId=${encodeURIComponent(zonaId)}`;
+    if (estado) {
+      url += `&estado=${encodeURIComponent(estado)}`;
+    }
+    return await apiService.get<SolicitudProductorZona[]>(url);
+  }
+
+  /**
+   * Lista las solicitudes pendientes de productor para una zona específica
+   */
+  async listarSolicitudesPendientesZona(zonaId: string): Promise<SolicitudProductorZona[]> {
+    return await apiService.get<SolicitudProductorZona[]>(
+      API_ENDPOINTS.SOLICITUDES_PRODUCTOR_ZONA_PENDIENTES(zonaId)
     );
   }
 
@@ -164,6 +202,22 @@ class AfiliacionesService {
       return zonasAprobadas;
     } catch (error) {
       console.error('Error listando zonas aprobadas:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Obtiene las zonas a las que el productor está afiliado (solicitudes aprobadas)
+   */
+  async listarMisZonasAfiliadas(productorId: string): Promise<SolicitudProductorZona[]> {
+    try {
+      // Obtener las solicitudes aprobadas del productor desde el nuevo endpoint
+      const solicitudes = await apiService.get<SolicitudProductorZona[]>(
+        `${API_ENDPOINTS.SOLICITUDES_PRODUCTOR_QUERY}?productorId=${encodeURIComponent(productorId)}&estado=APROBADA`
+      );
+      return solicitudes;
+    } catch (error) {
+      console.error('Error listando zonas afiliadas:', error);
       return [];
     }
   }

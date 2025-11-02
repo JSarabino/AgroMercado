@@ -18,6 +18,7 @@ import SolicitarAfiliacion from './pages/SolicitarAfiliacion';
 import SolicitarAfiliacionProductor from './pages/SolicitarAfiliacionProductor';
 import MisSolicitudesAfiliacion from './pages/MisSolicitudesAfiliacion';
 import MisSolicitudesProductor from './pages/MisSolicitudesProductor';
+import MisZonasAfiliadas from './pages/MisZonasAfiliadas';
 import './App.css';
 
 // Componente para proteger rutas
@@ -185,6 +186,14 @@ function AppRoutes() {
         element={
             <MainLayout>
               <MisSolicitudesProductor />
+            </MainLayout>
+        }
+      />
+      <Route
+        path="/productor/mis-zonas"
+        element={
+            <MainLayout>
+              <MisZonasAfiliadas />
             </MainLayout>
         }
       />

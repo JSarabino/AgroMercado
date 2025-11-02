@@ -1,21 +1,56 @@
-import React, { useState } from 'react';
-import { mockProductos } from '../data/mockData';
-import ProductCard from '../components/ProductCard';
-import { Search, Filter, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import productosService from '../services/productos.service';
+import type { Producto } from '../services/productos.service';
+import { Search, Filter, X, Loader, ShoppingCart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Catalogo: React.FC = () => {
+  const navigate = useNavigate();
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('todas');
   const [showFilters, setShowFilters] = useState(false);
 
   const categorias = ['todas', 'frutas', 'verduras', 'tubérculos', 'lácteos', 'granos', 'otros'];
 
-  const filteredProducts = mockProductos.filter(producto => {
+  useEffect(() => {
+    cargarProductos();
+  }, []);
+
+  const cargarProductos = async () => {
+    try {
+      setLoading(true);
+      const data = await productosService.listarProductosDisponibles();
+      setProductos(data);
+    } catch (error) {
+      console.error('Error cargando productos:', error);
+      alert('Error al cargar los productos. Intenta de nuevo más tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = productos.filter(producto => {
     const matchesSearch = producto.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+                         (producto.descripcion && producto.descripcion.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = selectedCategory === 'todas' || producto.categoria === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleAddToCart = (producto: Producto) => {
+    // TODO: Implementar lógica de carrito
+    alert(`Producto "${producto.nombre}" agregado al carrito`);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-screen">
+        <Loader size={48} className="spinner" />
+        <p>Cargando productos...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="catalogo-page">
@@ -76,12 +111,57 @@ const Catalogo: React.FC = () => {
         {filteredProducts.length > 0 ? (
           <div className="products-grid">
             {filteredProducts.map(producto => (
-              <ProductCard key={producto.id} producto={producto} />
+              <div key={producto.idProducto} className="product-card">
+                <div className="product-image">
+                  <img
+                    src={producto.imagenUrl || 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=300&fit=crop'}
+                    alt={producto.nombre}
+                  />
+                  {producto.stockDisponible < 10 && producto.stockDisponible > 0 && (
+                    <span className="stock-badge low-stock">¡Pocas unidades!</span>
+                  )}
+                  {producto.stockDisponible === 0 && (
+                    <span className="stock-badge out-of-stock">Agotado</span>
+                  )}
+                </div>
+
+                <div className="product-info">
+                  <h3>{producto.nombre}</h3>
+                  <p className="product-category">{producto.categoria}</p>
+                  {producto.descripcion && (
+                    <p className="product-description">{producto.descripcion}</p>
+                  )}
+
+                  <div className="product-footer">
+                    <div className="product-price">
+                      <span className="price">${producto.precioUnitario.toLocaleString('es-CO')}</span>
+                      <span className="unit">/ {producto.unidadMedida}</span>
+                    </div>
+                    <div className="product-stock">
+                      <span>{producto.stockDisponible} disponibles</span>
+                    </div>
+                  </div>
+
+                  <button
+                    className="btn-primary btn-block"
+                    onClick={() => handleAddToCart(producto)}
+                    disabled={producto.stockDisponible === 0}
+                  >
+                    <ShoppingCart size={18} />
+                    {producto.stockDisponible === 0 ? 'Agotado' : 'Agregar al Carrito'}
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
           <div className="no-results">
             <p>No se encontraron productos que coincidan con tu búsqueda</p>
+            {productos.length === 0 && (
+              <p className="no-products-hint">
+                Aún no hay productos disponibles. ¡Vuelve pronto!
+              </p>
+            )}
           </div>
         )}
       </div>

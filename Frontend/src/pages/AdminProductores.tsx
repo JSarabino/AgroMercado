@@ -64,23 +64,21 @@ const AdminProductores: React.FC = () => {
 
   const cargarSolicitudes = async (zonaIdParam: string) => {
     try {
-      // Obtener todas las afiliaciones de esta zona (incluye solicitudes de productores)
-      const afiliaciones = await afiliacionesService.listarAfiliacionesZona(zonaIdParam);
+      // Obtener las solicitudes de productores para esta zona usando el nuevo endpoint
+      const solicitudesRaw = await afiliacionesService.listarSolicitudesProductorZona(zonaIdParam);
 
-      // Filtrar solo las que son solicitudes de productores (solicitanteUsuarioId diferente al admin)
-      // Las solicitudes de productores tienen representanteNombre, representanteCorreo, etc.
-      const solicitudesProductores: SolicitudProductor[] = afiliaciones
-        .filter(af =>
-          af.solicitanteUsuarioId !== user?.id && // Excluir solicitudes del propio admin
-          (af.afiliacionId?.startsWith('AFP-') || true) // Las de productores empiezan con AFP- (opcional)
-        )
-        .map(af => ({
-          afiliacionId: af.afiliacionId,
-          usuarioId: af.solicitanteUsuarioId,
-          nombre: af.nombreVereda || 'Productor', // Por ahora usar nombreVereda, luego mejoraremos
-          email: 'productor@email.com', // Mejoraremos obteniendo del usuario
-          fechaSolicitud: af.updatedAt,
-          estado: af.estado,
+      // Mapear a la estructura esperada por el componente
+      const solicitudesProductores: SolicitudProductor[] = solicitudesRaw.map((sol) => ({
+        afiliacionId: sol.solicitudId || sol.afiliacionId,
+        usuarioId: sol.productorUsuarioId || sol.usuarioId,
+        nombre: sol.nombreProductor || 'Productor',
+        email: sol.correo || 'N/A',
+        telefono: sol.telefono,
+        documento: sol.documento,
+        direccion: sol.direccion,
+        tipoProductos: sol.tipoProductos,
+        fechaSolicitud: sol.createdAt || sol.updatedAt,
+        estado: sol.estado,
         }));
 
       setSolicitudes(solicitudesProductores);
@@ -91,7 +89,7 @@ const AdminProductores: React.FC = () => {
   };
 
   const handleAprobar = async (afiliacionId: string, usuarioId: string) => {
-    if (!confirm('¿Aprobar este productor en tu zona? Esto otorgará la membresía de PRODUCTOR.')) return;
+    if (!confirm('¿Aprobar este productor en tu zona? Esto otorgará automáticamente la membresía de PRODUCTOR.')) return;
 
     if (!zonaId) {
       alert('Error: No se pudo obtener la zona asignada.');
@@ -101,13 +99,10 @@ const AdminProductores: React.FC = () => {
     try {
       setProcessing(true);
 
-      // 1. Aprobar la afiliación del productor (cambia estado a APROBADA)
+      // Aprobar la solicitud del productor (el backend otorga la membresía automáticamente)
       await afiliacionesService.aprobarProductor(afiliacionId, 'Productor aprobado por administrador zonal');
 
-      // 2. Otorgar membresía al productor en la zona
-      await usuariosService.otorgarMembresia(usuarioId, zonaId, 'PRODUCTOR');
-
-      alert('✅ Productor aprobado exitosamente y membresía otorgada');
+      alert('✅ Productor aprobado exitosamente y membresía otorgada automáticamente');
 
       // Recargar solicitudes
       if (zonaId) {
