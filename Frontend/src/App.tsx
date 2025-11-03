@@ -8,18 +8,22 @@ import Register from './pages/Register';
 import Catalogo from './pages/Catalogo';
 import Carrito from './pages/Carrito';
 import Pedidos from './pages/Pedidos';
+import Pago from './pages/Pago';
 import Productores from './pages/Productores';
 import Notificaciones from './pages/Notificaciones';
 import ProductorDashboard from './pages/ProductorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminAfiliaciones from './pages/AdminAfiliaciones';
 import AdminProductores from './pages/AdminProductores';
+import AdminPedidos from './pages/AdminPedidos';
+import AdminPedidoDetalle from './pages/AdminPedidoDetalle';
 import SolicitarAfiliacion from './pages/SolicitarAfiliacion';
 import SolicitarAfiliacionProductor from './pages/SolicitarAfiliacionProductor';
 import MisSolicitudesAfiliacion from './pages/MisSolicitudesAfiliacion';
 import MisSolicitudesProductor from './pages/MisSolicitudesProductor';
 import MisZonasAfiliadas from './pages/MisZonasAfiliadas';
 import './App.css';
+import './styles/pedidos.css';
 
 // Componente para proteger rutas
 const ProtectedRoute: React.FC<{
@@ -150,6 +154,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/pago/:pedidoId"
+        element={
+            <MainLayout>
+              <Pago />
+            </MainLayout>
+        }
+      />
+      <Route
         path="/productores"
         element={
          // <ProtectedRoute allowedRoles={['cliente', 'admin']}>
@@ -245,6 +257,26 @@ function AppRoutes() {
           <ProtectedRoute allowedRoles={['admin_zona']}>
             <MainLayout>
               <AdminProductores />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pedidos"
+        element={
+          <ProtectedRoute allowedRoles={['admin_zona']}>
+            <MainLayout>
+              <AdminPedidos />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/pedidos/:pedidoId"
+        element={
+          <ProtectedRoute allowedRoles={['admin_zona']}>
+            <MainLayout>
+              <AdminPedidoDetalle />
             </MainLayout>
           </ProtectedRoute>
         }

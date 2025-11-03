@@ -57,6 +57,10 @@ export interface SolicitudProductorZona {
   fechaDecision?: string;
   createdAt: string;
   updatedAt: string;
+  // Propiedades opcionales para compatibilidad con respuestas del backend
+  afiliacionId?: string;
+  usuarioId?: string;
+  id?: string;
 }
 
 class AfiliacionesService {

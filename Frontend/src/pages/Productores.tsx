@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MapPin, Package, Loader, ShoppingBag } from 'lucide-react';
 import afiliacionesService from '../services/afiliaciones.service';
 import type { AfiliacionResumen } from '../services/afiliaciones.service';
@@ -12,7 +11,6 @@ interface ZonaConProductos extends AfiliacionResumen {
 }
 
 const Productores: React.FC = () => {
-  const navigate = useNavigate();
   const [zonas, setZonas] = useState<ZonaConProductos[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedZona, setSelectedZona] = useState<string | null>(null);

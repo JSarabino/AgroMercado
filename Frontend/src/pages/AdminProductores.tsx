@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import usuariosService from '../services/usuarios.service';
 import afiliacionesService from '../services/afiliaciones.service';
-import type { AfiliacionResumen } from '../services/afiliaciones.service';
 import { Users, CheckCircle, UserPlus, Mail, XCircle } from 'lucide-react';
 
 interface SolicitudProductor {
@@ -69,8 +67,8 @@ const AdminProductores: React.FC = () => {
 
       // Mapear a la estructura esperada por el componente
       const solicitudesProductores: SolicitudProductor[] = solicitudesRaw.map((sol) => ({
-        afiliacionId: sol.solicitudId || sol.afiliacionId,
-        usuarioId: sol.productorUsuarioId || sol.usuarioId,
+        afiliacionId: sol.solicitudId || sol.afiliacionId || '',
+        usuarioId: sol.productorUsuarioId || sol.usuarioId || '',
         nombre: sol.nombreProductor || 'Productor',
         email: sol.correo || 'N/A',
         telefono: sol.telefono,
@@ -88,7 +86,7 @@ const AdminProductores: React.FC = () => {
     }
   };
 
-  const handleAprobar = async (afiliacionId: string, usuarioId: string) => {
+  const handleAprobar = async (afiliacionId: string) => {
     if (!confirm('¿Aprobar este productor en tu zona? Esto otorgará automáticamente la membresía de PRODUCTOR.')) return;
 
     if (!zonaId) {
@@ -239,7 +237,7 @@ const AdminProductores: React.FC = () => {
                   </button>
                   <button
                     className="btn-success btn-sm"
-                    onClick={() => handleAprobar(solicitud.afiliacionId, solicitud.usuarioId)}
+                    onClick={() => handleAprobar(solicitud.afiliacionId)}
                     disabled={processing}
                   >
                     <CheckCircle size={16} />

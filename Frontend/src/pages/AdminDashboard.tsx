@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { mockEstadisticas } from '../data/mockData';
-import { Users, ShoppingBag, DollarSign, Activity, FileText, UserCog } from 'lucide-react';
+import { Users, ShoppingBag, DollarSign, Activity, FileText, UserCog, Package } from 'lucide-react';
 import afiliacionesService from '../services/afiliaciones.service';
 
 const AdminDashboard: React.FC = () => {
@@ -111,6 +111,7 @@ const AdminDashboard: React.FC = () => {
 
             {/* Solo mostrar si tiene una zona aprobada */}
             {!cargandoAfiliaciones && tieneZonaAprobada && (
+              <>
               <div
                 className="quick-access-card secondary"
                 onClick={() => navigate('/admin/productores')}
@@ -124,6 +125,21 @@ const AdminDashboard: React.FC = () => {
                   <span className="quick-access-badge">2 pendientes</span>
                 </div>
               </div>
+
+                <div
+                  className="quick-access-card success"
+                  onClick={() => navigate('/admin/pedidos')}
+                >
+                  <div className="quick-access-icon">
+                    <Package size={32} />
+                  </div>
+                  <div className="quick-access-content">
+                    <h3>Gestión de Pedidos</h3>
+                    <p>Administra los pedidos de tu zona</p>
+                    <span className="quick-access-badge">Activo</span>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Mensaje cuando no tiene zona aprobada */}

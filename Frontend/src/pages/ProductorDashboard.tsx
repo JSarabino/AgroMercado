@@ -5,7 +5,7 @@ import { mockProductos, mockPedidos } from '../data/mockData';
 import afiliacionesService from '../services/afiliaciones.service';
 import type { SolicitudProductorZona } from '../services/afiliaciones.service';
 import productosService from '../services/productos.service';
-import type { Producto, CrearProductoRequest } from '../services/productos.service';
+import type { CrearProductoRequest } from '../services/productos.service';
 import { TrendingUp, Package, ShoppingCart, DollarSign, Plus, FileText, Activity, MapPin } from 'lucide-react';
 
 const ProductorDashboard: React.FC = () => {

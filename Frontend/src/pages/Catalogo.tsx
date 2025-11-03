@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import productosService from '../services/productos.service';
+import pedidosService from '../services/pedidos.service';
 import type { Producto } from '../services/productos.service';
 import { Search, Filter, X, Loader, ShoppingCart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 const Catalogo: React.FC = () => {
-  const navigate = useNavigate();
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('todas');
   const [showFilters, setShowFilters] = useState(false);
+  const [agregandoId, setAgregandoId] = useState<number | null>(null);
+  const [cantidades, setCantidades] = useState<Record<number, number>>({});
 
   const categorias = ['todas', 'frutas', 'verduras', 'tubérculos', 'lácteos', 'granos', 'otros'];
 
@@ -38,9 +39,33 @@ const Catalogo: React.FC = () => {
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddToCart = (producto: Producto) => {
-    // TODO: Implementar lógica de carrito
-    alert(`Producto "${producto.nombre}" agregado al carrito`);
+  const handleAddToCart = async (producto: Producto) => {
+    try {
+      setAgregandoId(producto.idProducto);
+      const cantidad = cantidades[producto.idProducto] || 1;
+
+      await pedidosService.agregarProductoAlCarrito(producto.idProducto, cantidad);
+
+      // Mostrar mensaje de éxito
+      alert(`✅ ${producto.nombre} agregado al carrito (${cantidad} unidades)`);
+
+      // Resetear cantidad
+      setCantidades({ ...cantidades, [producto.idProducto]: 1 });
+    } catch (error: any) {
+      console.error('Error al agregar al carrito:', error);
+      const mensaje = error.response?.data?.message || 'Error al agregar producto al carrito';
+      alert(`❌ ${mensaje}`);
+    } finally {
+      setAgregandoId(null);
+    }
+  };
+
+  const handleCantidadChange = (productoId: number, cantidad: number) => {
+    if (cantidad < 1) return;
+    const producto = productos.find(p => p.idProducto === productoId);
+    if (producto && cantidad > producto.stockDisponible) return;
+
+    setCantidades({ ...cantidades, [productoId]: cantidad });
   };
 
   if (loading) {
@@ -142,14 +167,43 @@ const Catalogo: React.FC = () => {
                     </div>
                   </div>
 
-                  <button
-                    className="btn-primary btn-block"
-                    onClick={() => handleAddToCart(producto)}
-                    disabled={producto.stockDisponible === 0}
-                  >
-                    <ShoppingCart size={18} />
-                    {producto.stockDisponible === 0 ? 'Agotado' : 'Agregar al Carrito'}
-                  </button>
+                  <div className="product-actions">
+                    <div className="cantidad-selector">
+                      <button
+                        onClick={() => handleCantidadChange(producto.idProducto, (cantidades[producto.idProducto] || 1) - 1)}
+                        disabled={!cantidades[producto.idProducto] || cantidades[producto.idProducto] <= 1}
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        max={producto.stockDisponible}
+                        value={cantidades[producto.idProducto] || 1}
+                        onChange={(e) => handleCantidadChange(producto.idProducto, parseInt(e.target.value) || 1)}
+                        disabled={producto.stockDisponible === 0}
+                      />
+                      <button
+                        onClick={() => handleCantidadChange(producto.idProducto, (cantidades[producto.idProducto] || 1) + 1)}
+                        disabled={cantidades[producto.idProducto] >= producto.stockDisponible}
+                      >
+                        +
+                      </button>
+                    </div>
+                    <button
+                      className="btn-primary btn-block"
+                      onClick={() => handleAddToCart(producto)}
+                      disabled={producto.stockDisponible === 0 || agregandoId === producto.idProducto}
+                    >
+                      {agregandoId === producto.idProducto ? (
+                        <><Loader size={18} className="spinner" /> Agregando...</>
+                      ) : producto.stockDisponible === 0 ? (
+                        'Agotado'
+                      ) : (
+                        <><ShoppingCart size={18} /> Agregar al Carrito</>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

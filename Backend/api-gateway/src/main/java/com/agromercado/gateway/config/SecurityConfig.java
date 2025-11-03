@@ -37,6 +37,9 @@ public class SecurityConfig {
                 // DESARROLLO: Permitir acceso a productos
                 .pathMatchers("/productos/**").permitAll()
 
+                // DESARROLLO: Permitir acceso a carrito, pedidos y pagos
+                .pathMatchers("/carrito/**", "/pedidos/**", "/pagos/**").permitAll()
+
                 // Todas las demás peticiones requieren autenticación
                 .anyExchange().authenticated()
             )

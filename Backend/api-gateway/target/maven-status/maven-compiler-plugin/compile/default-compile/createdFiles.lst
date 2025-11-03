@@ -1,0 +1,4 @@
+com\agromercado\gateway\filter\JwtAuthenticationGlobalFilter.class
+com\agromercado\gateway\config\CorsConfig.class
+com\agromercado\gateway\config\SecurityConfig.class
+com\agromercado\gateway\ApiGatewayApplication.class

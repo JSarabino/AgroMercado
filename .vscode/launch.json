@@ -39,6 +39,16 @@
             "projectName": "api-gateway",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-PedidosApplication<pedidos-service>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.agromercado.pedidos.PedidosApplication",
+            "projectName": "pedidos-service",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
