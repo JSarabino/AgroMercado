@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:accountstestdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+
+# Deshabilitar Eureka para tests
+eureka:
+  client:
+    enabled: false
+
+# JWT Configuration para tests
+app:
+  jwt:
+    dev:
+      secret: test-secret-key-for-jwt-generation-minimum-256-bits
+      ttl-seconds: 3600
+
+logging:
+  level:
+    com.agromercado: DEBUG
+    org.hibernate.SQL: DEBUG
