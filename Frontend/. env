@@ -1,0 +1,6 @@
+# API Configuration
+VITE_API_BASE_URL=http://localhost:8081
+VITE_GATEWAY_URL=http://localhost:8080
+
+# Default tenant for development
+VITE_DEFAULT_TENANT=ZONA-d7585f1a-b6a9-4167-a47d-956209eda6b5

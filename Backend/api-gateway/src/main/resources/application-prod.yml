@@ -1,0 +1,106 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+        - id: accounts-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/accounts/**
+          filters:
+            - RewritePath=/accounts/(?<segment>.*), /${segment}
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: productos-service
+          uri: lb://productos-service
+          predicates:
+            - Path=/productos/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: pedidos-carrito
+          uri: lb://pedidos-service
+          predicates:
+            - Path=/carrito/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: pedidos-service
+          uri: lb://pedidos-service
+          predicates:
+            - Path=/pedidos/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: pagos-service
+          uri: lb://pedidos-service
+          predicates:
+            - Path=/pagos/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: auth-service
+          uri: lb://accounts-service
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: accounts-cmd
+          uri: lb://accounts-service
+          predicates:
+            - Path=/cmd/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+        - id: accounts-qry
+          uri: lb://accounts-service
+          predicates:
+            - Path=/qry/**
+          filters:
+            - AddRequestHeader=X-Gateway-Passed, true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://eureka-server:8761/eureka/}
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+app:
+  jwt:
+    dev:
+      enabled: true
+      secret: ${APP_JWT_DEV_SECRET:dev-0123456789abcdef-0123456789abcd}
+      ttl-seconds: 3600
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: INFO
+    com.agromercado: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true

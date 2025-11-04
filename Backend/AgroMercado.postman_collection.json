@@ -1,0 +1,935 @@
+{
+	"info": {
+		"_postman_id": "agromercado-collection-2025",
+		"name": "AgroMercado API",
+		"description": "Colección completa de endpoints para AgroMercado (Accounts Service + Productos Service)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "productos_url",
+			"value": "http://localhost:8080/productos",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "afiliacion_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "zona_id",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "🔐 Auth & Dev",
+			"item": [
+				{
+					"name": "Login con Email y Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"access_token\", jsonData.accessToken);",
+									"pm.collectionVariables.set(\"user_id\", jsonData.usuarioId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@agro.com\",\n  \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login real con email y contraseña. Retorna JWT y datos del usuario con sus roles y membresías."
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Token Admin Global",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"pm.collectionVariables.set(\"user_id\", \"admin-global-001\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"admin-global-001\",\n  \"roles\": [\"ADMIN_GLOBAL\"],\n  \"ttlSeconds\": 7200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/dev/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"dev",
+								"token"
+							]
+						},
+						"description": "Genera un JWT para un Administrador Global"
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Token Admin Zona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"pm.collectionVariables.set(\"user_id\", \"admin-zona-001\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"admin-zona-001\",\n  \"roles\": [\"ADMIN_ZONA\"],\n  \"ttlSeconds\": 7200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/dev/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"dev",
+								"token"
+							]
+						},
+						"description": "Genera un JWT para un Administrador de Zona"
+					},
+					"response": []
+				},
+				{
+					"name": "Generar Token Productor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"pm.collectionVariables.set(\"user_id\", \"productor-001\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"productor-001\",\n  \"roles\": [\"PRODUCTOR\"],\n  \"ttlSeconds\": 7200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/dev/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"dev",
+								"token"
+							]
+						},
+						"description": "Genera un JWT para un Productor"
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Info Token Actual",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/auth/dev/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"dev",
+								"me"
+							]
+						},
+						"description": "Muestra el userId y roles del token actual"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "👤 Usuarios",
+			"item": [
+				{
+					"name": "Registrar Usuario",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"user_id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"nuevo.usuario@agromercado.com\",\n  \"nombre\": \"Juan Pérez\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/usuarios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"usuarios"
+							]
+						},
+						"description": "Registra un nuevo usuario con email, nombre y contraseña (sin roles globales)"
+					},
+					"response": []
+				},
+				{
+					"name": "Agregar Rol Global",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rolGlobal\": \"ADMIN_GLOBAL\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/usuarios/{{user_id}}/roles-globales",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"usuarios",
+								"{{user_id}}",
+								"roles-globales"
+							]
+						},
+						"description": "Agrega rol ADMIN_GLOBAL a un usuario (requiere token de ADMIN_GLOBAL)"
+					},
+					"response": []
+				},
+				{
+					"name": "Otorgar Membresía Zonal (Manual)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"zonaId\": \"{{zona_id}}\",\n  \"rolZonal\": \"ADMIN_ZONA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/usuarios/{{user_id}}/membresias",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"usuarios",
+								"{{user_id}}",
+								"membresias"
+							]
+						},
+						"description": "Otorga membresía zonal manualmente (ADMIN_ZONA o PRODUCTOR)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📝 Afiliaciones - Command",
+			"item": [
+				{
+					"name": "Solicitar Afiliación Zona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"afiliacion_id\", jsonData.afiliacionId);",
+									"pm.collectionVariables.set(\"zona_id\", jsonData.zonaId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreVereda\": \"El Mirador\",\n  \"municipio\": \"Popayán\",\n  \"telefono\": \"3001234567\",\n  \"correo\": \"contacto@vereda.com\",\n  \"representanteNombre\": \"Ana Ruiz\",\n  \"representanteDocumento\": \"CC-112233\",\n  \"representanteCorreo\": \"ana.ruiz@vereda.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/afiliaciones/solicitar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"afiliaciones",
+								"solicitar"
+							]
+						},
+						"description": "Admin Zona solicita crear una nueva zona productiva"
+					},
+					"response": []
+				},
+				{
+					"name": "Aprobar Afiliación",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"observaciones\": \"Documentación verificada. Zona aprobada.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/afiliaciones/{{afiliacion_id}}/aprobar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"afiliaciones",
+								"{{afiliacion_id}}",
+								"aprobar"
+							]
+						},
+						"description": "Admin Global aprueba una solicitud de zona"
+					},
+					"response": []
+				},
+				{
+					"name": "Rechazar Afiliación",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"observaciones\": \"Documentación incompleta. Favor enviar copia de RUT.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/afiliaciones/{{afiliacion_id}}/rechazar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"afiliaciones",
+								"{{afiliacion_id}}",
+								"rechazar"
+							]
+						},
+						"description": "Admin Global rechaza una solicitud de zona"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔍 Afiliaciones - Query",
+			"item": [
+				{
+					"name": "Listar Afiliaciones por Solicitante",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Roles",
+								"value": "ADMIN_ZONA",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qry/afiliaciones?solicitante={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"qry",
+								"afiliaciones"
+							],
+							"query": [
+								{
+									"key": "solicitante",
+									"value": "{{user_id}}"
+								}
+							]
+						},
+						"description": "Ver todas las afiliaciones que ha solicitado un usuario"
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Afiliaciones por Zona",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Roles",
+								"value": "ADMIN_GLOBAL",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qry/afiliaciones?zonaId={{zona_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"qry",
+								"afiliaciones"
+							],
+							"query": [
+								{
+									"key": "zonaId",
+									"value": "{{zona_id}}"
+								}
+							]
+						},
+						"description": "Ver todas las afiliaciones de una zona específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Detalle de Afiliación",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Roles",
+								"value": "ADMIN_GLOBAL",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qry/afiliaciones/{{afiliacion_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"qry",
+								"afiliaciones",
+								"{{afiliacion_id}}"
+							]
+						},
+						"description": "Ver detalle de una afiliación específica"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📦 Productos Service",
+			"item": [
+				{
+					"name": "Listar Productos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productos_url}}/productos",
+							"host": [
+								"{{productos_url}}"
+							],
+							"path": [
+								"productos"
+							]
+						},
+						"description": "Obtiene la lista de todos los productos disponibles"
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener Producto por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{productos_url}}/productos/1",
+							"host": [
+								"{{productos_url}}"
+							],
+							"path": [
+								"productos",
+								"1"
+							]
+						},
+						"description": "Obtiene un producto específico por su ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Producto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Café Orgánico Premium\",\n  \"descripcion\": \"Café cultivado sin químicos, secado al sol\",\n  \"precio\": 25000,\n  \"cantidad\": 50,\n  \"unidad\": \"libra\",\n  \"productorId\": \"productor-001\",\n  \"categoria\": \"Café\"\n}"
+						},
+						"url": {
+							"raw": "{{productos_url}}/productos",
+							"host": [
+								"{{productos_url}}"
+							],
+							"path": [
+								"productos"
+							]
+						},
+						"description": "Crea un nuevo producto"
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Producto",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Café Orgánico Premium - Actualizado\",\n  \"descripcion\": \"Café cultivado sin químicos, secado al sol, tostado medio\",\n  \"precio\": 28000,\n  \"cantidad\": 45,\n  \"unidad\": \"libra\",\n  \"productorId\": \"productor-001\",\n  \"categoria\": \"Café\"\n}"
+						},
+						"url": {
+							"raw": "{{productos_url}}/productos/1",
+							"host": [
+								"{{productos_url}}"
+							],
+							"path": [
+								"productos",
+								"1"
+							]
+						},
+						"description": "Actualiza un producto existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Eliminar Producto",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{productos_url}}/productos/1",
+							"host": [
+								"{{productos_url}}"
+							],
+							"path": [
+								"productos",
+								"1"
+							]
+						},
+						"description": "Elimina un producto"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🧪 Flujo Completo - Test E2E",
+			"item": [
+				{
+					"name": "1. Generar Token Admin Global",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"access_token\", jsonData.access_token);",
+									"pm.collectionVariables.set(\"user_id\", \"admin-global-test\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"admin-global-test\",\n  \"roles\": [\"ADMIN_GLOBAL\"],\n  \"ttlSeconds\": 7200\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/dev/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"dev",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Registrar Admin Zona",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"admin_zona_id\", jsonData.id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin.zona@test.com\",\n  \"nombre\": \"Admin Zona Test\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/usuarios",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Admin Zona Solicita Afiliación",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"pm.collectionVariables.set(\"afiliacion_id\", jsonData.afiliacionId);",
+									"pm.collectionVariables.set(\"zona_id\", jsonData.zonaId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombreVereda\": \"Vereda Test E2E\",\n  \"municipio\": \"Popayán\",\n  \"telefono\": \"3001234567\",\n  \"correo\": \"test@vereda.com\",\n  \"representanteNombre\": \"Test Representante\",\n  \"representanteDocumento\": \"CC-999999\",\n  \"representanteCorreo\": \"rep@test.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/afiliaciones/solicitar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"afiliaciones",
+								"solicitar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Admin Global Aprueba Afiliación",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"observaciones\": \"Test E2E - Aprobado automáticamente\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cmd/afiliaciones/{{afiliacion_id}}/aprobar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cmd",
+								"afiliaciones",
+								"{{afiliacion_id}}",
+								"aprobar"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Verificar Afiliación Aprobada",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-User-Id",
+								"value": "{{user_id}}",
+								"type": "text"
+							},
+							{
+								"key": "X-User-Roles",
+								"value": "ADMIN_GLOBAL",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/qry/afiliaciones/{{afiliacion_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"qry",
+								"afiliaciones",
+								"{{afiliacion_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

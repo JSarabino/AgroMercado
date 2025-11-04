@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.agromercado.accounts.cmd.domain.enum_.EstadoMembresia;
 import com.agromercado.accounts.cmd.domain.enum_.RolZonal;
+import com.agromercado.accounts.cmd.domain.enum_.TipoUsuario;
 import com.agromercado.accounts.cmd.domain.event.domain.DomainEvent;
 import com.agromercado.accounts.cmd.domain.event.domain.DomainEvents;
 import com.agromercado.accounts.cmd.domain.event.usuario.MembresiaZonalOtorgada;
@@ -15,6 +16,8 @@ public class Usuario {
   private final String usuarioId;
   private String email;
   private String nombre;
+  private String passwordHash;
+  private TipoUsuario tipoUsuario;
   private String estado; // ACTIVO | BLOQUEADO | ELIMINADO
   private int version;
 
@@ -23,16 +26,20 @@ public class Usuario {
 
   private final List<DomainEvent> domainEvents = new ArrayList<>();
 
-  private Usuario(String usuarioId, String email, String nombre) {
+  private Usuario(String usuarioId, String email, String nombre, String passwordHash, TipoUsuario tipoUsuario) {
     this.usuarioId = usuarioId; this.email = email; this.nombre = nombre;
+    this.passwordHash = passwordHash;
+    this.tipoUsuario = (tipoUsuario != null ? tipoUsuario : TipoUsuario.CLIENTE);
     this.estado = "ACTIVO"; this.version = 1;
   }
 
   // NUEVO -> lo usa UsuarioProxy (rehidratación desde JPA)
-  protected Usuario(String usuarioId, String email, String nombre, String estado) {
+  protected Usuario(String usuarioId, String email, String nombre, String passwordHash, TipoUsuario tipoUsuario, String estado) {
     this.usuarioId = usuarioId;
     this.email = email;
     this.nombre = nombre;
+    this.passwordHash = passwordHash;
+    this.tipoUsuario = (tipoUsuario != null ? tipoUsuario : TipoUsuario.CLIENTE);
     this.estado = (estado != null ? estado : "ACTIVO");
     this.version = 1;
   }
@@ -54,11 +61,13 @@ public class Usuario {
     public void activar() { this.estado = EstadoMembresia.ACTIVA; }
   }
 
-  public static Usuario registrar(String email, String nombre, DomainEvents factory) {
+  public static Usuario registrar(String email, String nombre, String passwordHash, TipoUsuario tipoUsuario, DomainEvents factory) {
     if (email == null || email.isBlank()) throw new IllegalArgumentException("Email requerido");
     if (nombre == null || nombre.isBlank()) throw new IllegalArgumentException("Nombre requerido");
+    if (passwordHash == null || passwordHash.isBlank()) throw new IllegalArgumentException("Password requerido");
+    if (tipoUsuario == null) throw new IllegalArgumentException("Tipo de usuario requerido");
     String id = "USR-" + UUID.randomUUID();
-    var u = new Usuario(id, email, nombre);
+    var u = new Usuario(id, email, nombre, passwordHash, tipoUsuario);
     var meta = factory.newMeta("Usuario", id, null, u.version, id, null, null);
     u.domainEvents.add(new UsuarioRegistrado(factory.newEventId(), factory.now(), meta, id, email, nombre));
     return u;
@@ -91,6 +100,8 @@ public class Usuario {
   public String getUsuarioId() { return usuarioId; }
   public String getEmail() { return email; }
   public String getNombre() { return nombre; }
+  public String getPasswordHash() { return passwordHash; }
+  public TipoUsuario getTipoUsuario() { return tipoUsuario; }
   public String getEstado() { return estado; }
   public int getVersion() { return version; }
   public Set<String> getRolesGlobales() { return rolesGlobales; }

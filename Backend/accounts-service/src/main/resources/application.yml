@@ -5,6 +5,11 @@ spring:
   application:
     name: accounts-service  # Nombre de la app (aparece en logs y actuator)
 
+  # Deshabilita verificación de compatibilidad Spring Cloud/Boot
+  cloud:
+    compatibility-verifier:
+      enabled: false
+
   # === JPA / HIBERNATE ===
   jpa:
     hibernate:
@@ -20,7 +25,7 @@ spring:
   # === Mongo ===
   data:
     mongodb:
-      uri: mongodb://localhost:27017/accounts_qry
+      uri: mongodb://root:root@localhost:27017/accounts_qry?authSource=admin
       database: accounts_qry
 
   # Asegura ISO8601 y no timestamps en application.yml:
@@ -31,8 +36,8 @@ spring:
   # === DATASOURCE: conexión a PostgreSQL ===
   datasource:
     url: jdbc:postgresql://localhost:5432/accounts_cmd
-    username: ${POSTGRES_USER:accounts}
-    password: ${POSTGRES_PASSWORD:accounts}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:root}
     hikari:
       maximum-pool-size: 10
 
@@ -71,3 +76,14 @@ app:
       enabled: true
       secret: dev-0123456789abcdef-0123456789abcd
       ttl-seconds: 3600
+
+# === Eureka Client Configuration ===
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}

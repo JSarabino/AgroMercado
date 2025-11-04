@@ -1,0 +1,19 @@
+{
+  "name": "agromercado-infrastructure",
+  "version": "1.0.0",
+  "description": "AgroMercado infrastructure as code with Pulumi",
+  "main": "index.js",
+  "scripts": {
+    "up": "pulumi up",
+    "destroy": "pulumi destroy",
+    "preview": "pulumi preview",
+    "stack": "pulumi stack"
+  },
+  "dependencies": {
+    "@pulumi/pulumi": "^3.100.0",
+    "@pulumi/aws": "^6.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  }
+}
