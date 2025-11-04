@@ -1,0 +1,3 @@
+name: agromercado-infrastructure
+runtime: nodejs
+description: AgroMercado Infrastructure on AWS EC2 with Docker
