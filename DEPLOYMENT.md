@@ -243,11 +243,11 @@ API_GATEWAY_PORT=8080
 FRONTEND_PORT=80
 
 # Security
-JWT_SECRET=prod-secure-jwt-key-0123456789abcdefghijklmnopqrstuvwxyz
+JWT_SECRET=Taknfw2le9O8Y7Taknfw2le9O8Y7
 
 # Frontend Configuration
-VITE_API_BASE_URL=http://<PUBLIC_IP>:8080
-VITE_GATEWAY_URL=http://<PUBLIC_IP>:8080
+VITE_API_BASE_URL=http://3.18.218.122:8080
+VITE_GATEWAY_URL=http://3.18.218.122:8080
 ```
 
 Guardar: `Ctrl+X`, `Y`, `Enter`

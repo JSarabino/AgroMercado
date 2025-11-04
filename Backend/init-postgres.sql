@@ -7,5 +7,5 @@ CREATE DATABASE accounts_cmd;
 -- Base de datos para productos-service
 CREATE DATABASE productos_db;
 
--- Puedes agregar más bases de datos aquí según tus necesidades
--- CREATE DATABASE pedidos_db;
+-- Base de datos para pedidos-service
+CREATE DATABASE pedidos_db;
