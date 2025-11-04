@@ -2,13 +2,14 @@
 FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
+# Copy pom.xml and source
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy source and build
 COPY src ./src
-RUN mvn clean package -DskipTests -B
+
+# Build with retry logic for Maven Central issues
+RUN mvn clean package -DskipTests -B || \
+    (sleep 10 && mvn clean package -DskipTests -B) || \
+    (sleep 30 && mvn clean package -DskipTests -B)
 
 # Stage 2: Runtime
 FROM eclipse-temurin:21-jre-alpine
