@@ -81,10 +81,11 @@ docker-compose pull postgres mongodb rabbitmq || log_warning "Algunas imágenes 
 # PASO 3: Build de imágenes
 # ============================================
 log_info "Construyendo imágenes de microservicios y frontend..."
-log_info "⚠️  Este proceso puede tomar 10-20 minutos en el primer deploy..."
+log_info "⚠️  Primer deploy: ~15-20 min | Deploys siguientes: ~2-5 min (usando cache)"
 
-# Build con progreso mínimo para no saturar los logs de CI/CD
-docker-compose build --no-cache 2>&1 | grep -E "(Step|Successfully|ERROR)" || true
+# Build usando cache de Docker para mayor velocidad
+# Solo reconstruye las capas que cambiaron
+docker-compose build 2>&1 | grep -E "(Step|Successfully|ERROR|Pulling|Using cache)" || true
 
 log_success "Imágenes construidas exitosamente"
 
