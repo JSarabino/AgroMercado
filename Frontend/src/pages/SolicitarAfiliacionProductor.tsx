@@ -115,7 +115,7 @@ const SolicitarAfiliacionProductor: React.FC = () => {
           <ArrowLeft size={20} />
           Volver al Dashboard
         </button>
-        <h1>📝 Solicitar Afiliación a Zona Productiva</h1>
+        <h1>📝 Solicitar Afiliación a Zona Productiva sarabino</h1>
         <p>Completa el formulario para solicitar tu afiliación como productor</p>
       </div>
 
