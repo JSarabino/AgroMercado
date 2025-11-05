@@ -41,4 +41,3 @@ eureka:
     prefer-ip-address: false
     hostname: localhost
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
-
