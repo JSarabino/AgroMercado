@@ -37,7 +37,7 @@ public class CarritoController {
     @PostMapping("/agregar")
     public ResponseEntity<PedidoResponse> agregarProducto(
             @RequestHeader("X-User-Id") String clienteId,
-            @RequestHeader("X-User-Name") String clienteNombre,
+            @RequestHeader(value = "X-User-Name", required = false, defaultValue = "Usuario") String clienteNombre,
             @RequestHeader(value = "X-User-Email", required = false) String clienteEmail,
             @Valid @RequestBody AgregarProductoCarritoRequest request) {
 

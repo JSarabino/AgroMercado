@@ -100,11 +100,22 @@ const AdminProductores: React.FC = () => {
       // Aprobar la solicitud del productor (el backend otorga la membresía automáticamente)
       await afiliacionesService.aprobarProductor(afiliacionId, 'Productor aprobado por administrador zonal');
 
+      // Actualizar el estado local inmediatamente sin recargar
+      setSolicitudes(prevSolicitudes =>
+        prevSolicitudes.map(solicitud =>
+          solicitud.afiliacionId === afiliacionId
+            ? { ...solicitud, estado: 'APROBADA' as const }
+            : solicitud
+        )
+      );
+
       alert('✅ Productor aprobado exitosamente y membresía otorgada automáticamente');
 
-      // Recargar solicitudes
+      // Recargar en segundo plano para asegurar sincronización con el backend
       if (zonaId) {
-        await cargarSolicitudes(zonaId);
+        cargarSolicitudes(zonaId).catch(error => {
+          console.error('Error al recargar solicitudes:', error);
+        });
       }
     } catch (error) {
       console.error('Error aprobando:', error);
@@ -126,11 +137,22 @@ const AdminProductores: React.FC = () => {
       setProcessing(true);
       await afiliacionesService.rechazarProductor(afiliacionId, observaciones || 'Solicitud rechazada por administrador zonal');
 
+      // Actualizar el estado local inmediatamente sin recargar
+      setSolicitudes(prevSolicitudes =>
+        prevSolicitudes.map(solicitud =>
+          solicitud.afiliacionId === afiliacionId
+            ? { ...solicitud, estado: 'RECHAZADA' as const }
+            : solicitud
+        )
+      );
+
       alert('❌ Solicitud rechazada');
 
-      // Recargar solicitudes
+      // Recargar en segundo plano para asegurar sincronización con el backend
       if (zonaId) {
-        await cargarSolicitudes(zonaId);
+        cargarSolicitudes(zonaId).catch(error => {
+          console.error('Error al recargar solicitudes:', error);
+        });
       }
     } catch (error) {
       console.error('Error rechazando:', error);
@@ -196,17 +218,43 @@ const AdminProductores: React.FC = () => {
                 </div>
                 <div className="user-info">
                   <h3>{solicitud.nombre}</h3>
-                  <div className="contact-info">
-                    <span>
-                      <Mail size={14} />
-                      ID: {solicitud.usuarioId}
-                    </span>
-                    <span style={{ marginLeft: '1rem', fontSize: '0.875rem', color: '#718096' }}>
-                      Solicitud: {solicitud.afiliacionId}
+                  <div className="contact-info" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {solicitud.email && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                        <Mail size={14} />
+                        {solicitud.email}
+                      </span>
+                    )}
+                    {solicitud.documento && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#718096' }}>
+                        <strong>Documento:</strong> {solicitud.documento}
+                      </span>
+                    )}
+                    {solicitud.telefono && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#718096' }}>
+                        <strong>Teléfono:</strong> {solicitud.telefono}
+                      </span>
+                    )}
+                    {solicitud.direccion && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#718096' }}>
+                        <strong>Dirección:</strong> {solicitud.direccion}
+                      </span>
+                    )}
+                    {solicitud.tipoProductos && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#718096' }}>
+                        <strong>Productos:</strong> {solicitud.tipoProductos}
+                      </span>
+                    )}
+                    <span style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>
+                      ID Usuario: {solicitud.usuarioId} | Solicitud: {solicitud.afiliacionId}
                     </span>
                   </div>
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: '#718096' }}>
-                    Fecha: {new Date(solicitud.fechaSolicitud).toLocaleDateString('es-CO')}
+                  <div style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#718096' }}>
+                    Fecha de solicitud: {new Date(solicitud.fechaSolicitud).toLocaleDateString('es-CO', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
                   </div>
                   <div style={{
                     marginTop: '0.5rem',

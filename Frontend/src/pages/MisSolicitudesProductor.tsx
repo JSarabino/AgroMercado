@@ -145,13 +145,23 @@ const MisSolicitudesProductor: React.FC = () => {
                     </span>
                   </td>
                   <td>
-                    {new Date(solicitud.updatedAt).toLocaleString('es-CO', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {(() => {
+                      const fecha = solicitud.fechaDecision || solicitud.updatedAt || solicitud.fechaSolicitud;
+                      if (!fecha) return 'No disponible';
+                      try {
+                        const date = new Date(fecha);
+                        if (isNaN(date.getTime())) return 'Fecha inválida';
+                        return date.toLocaleString('es-CO', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        });
+                      } catch {
+                        return 'Fecha inválida';
+                      }
+                    })()}
                   </td>
                 </tr>
               ))}

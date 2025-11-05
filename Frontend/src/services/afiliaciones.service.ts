@@ -38,7 +38,12 @@ export interface AfiliacionResumen {
   solicitanteUsuarioId: string;
   nombreVereda: string;
   municipio: string;
-  updatedAt: string;
+  representanteNombre?: string;
+  telefono?: string;
+  correo?: string;
+  updatedAt?: string;
+  fechaSolicitud?: string;
+  fechaDecision?: string;
 }
 
 export interface SolicitudProductorZona {

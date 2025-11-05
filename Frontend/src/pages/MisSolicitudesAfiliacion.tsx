@@ -57,14 +57,27 @@ const MisSolicitudesAfiliacion: React.FC = () => {
     }
   };
 
-  const formatFecha = (fecha: string) => {
-    return new Date(fecha).toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  const formatFecha = (fecha?: string | null) => {
+    if (!fecha) return 'No disponible';
+    try {
+      const date = new Date(fecha);
+      if (isNaN(date.getTime())) return 'Fecha inválida';
+      return date.toLocaleDateString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Fecha inválida';
+    }
+  };
+
+  const getFechaActualizacion = (solicitud: AfiliacionResumen) => {
+    // Priorizar fechaDecision si existe (para aprobadas/rechazadas)
+    // luego updatedAt, luego fechaSolicitud como fallback
+    return solicitud.fechaDecision || solicitud.updatedAt || solicitud.fechaSolicitud;
   };
 
   return (
@@ -126,18 +139,59 @@ const MisSolicitudesAfiliacion: React.FC = () => {
               {solicitudes.map((solicitud) => (
                 <tr key={solicitud.afiliacionId} className={getEstadoClase(solicitud.estado)}>
                   <td className="solicitud-id-cell">
-                    <code>{solicitud.afiliacionId}</code>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <code style={{ fontSize: '0.85rem' }}>{solicitud.afiliacionId}</code>
+                      {solicitud.representanteNombre && (
+                        <span style={{ fontSize: '0.75rem', color: '#718096', marginTop: '0.25rem' }}>
+                          {solicitud.representanteNombre}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="vereda-cell">
                     <div className="cell-with-icon">
                       <MapPin size={16} />
-                      <strong>{solicitud.nombreVereda}</strong>
+                      <div>
+                        <strong>{solicitud.nombreVereda}</strong>
+                        {solicitud.telefono && (
+                          <div style={{ fontSize: '0.75rem', color: '#718096', marginTop: '0.25rem' }}>
+                            📞 {solicitud.telefono}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
-                  <td>{solicitud.municipio}</td>
+                  <td>
+                    <div>
+                      {solicitud.municipio}
+                      {solicitud.correo && (
+                        <div style={{ fontSize: '0.75rem', color: '#718096', marginTop: '0.25rem' }}>
+                          ✉️ {solicitud.correo}
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="zona-cell">
                     {solicitud.zonaId ? (
-                      <span className="zona-badge">{solicitud.zonaId}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <span className="zona-badge" style={{ marginBottom: '0.25rem' }}>
+                          {solicitud.nombreVereda || 'Zona Aprobada'}
+                        </span>
+                        <span style={{
+                          fontSize: '0.7rem',
+                          color: '#718096',
+                          display: 'block'
+                        }}>
+                          ID: <code style={{
+                            fontSize: '0.7rem',
+                            color: '#718096',
+                            background: '#f7fafc',
+                            padding: '0.15rem 0.35rem',
+                            borderRadius: '3px',
+                            fontFamily: 'monospace'
+                          }}>{solicitud.zonaId}</code>
+                        </span>
+                      </div>
                     ) : (
                       <span className="zona-pendiente">Sin asignar</span>
                     )}
@@ -151,7 +205,7 @@ const MisSolicitudesAfiliacion: React.FC = () => {
                   <td className="fecha-cell">
                     <div className="cell-with-icon">
                       <Calendar size={16} />
-                      {formatFecha(solicitud.updatedAt)}
+                      {formatFecha(getFechaActualizacion(solicitud))}
                     </div>
                   </td>
                 </tr>

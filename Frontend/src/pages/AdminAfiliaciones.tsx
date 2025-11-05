@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import afiliacionesService from '../services/afiliaciones.service';
 import type { AfiliacionResumen } from '../services/afiliaciones.service';
 import { CheckCircle, XCircle, Clock, MapPin, User } from 'lucide-react';
@@ -140,7 +141,9 @@ const AdminAfiliaciones: React.FC = () => {
                   <td>
                     <div className="cell-with-icon">
                       <User size={16} />
-                      {afiliacion.solicitanteUsuarioId}
+                      <span title={afiliacion.solicitanteUsuarioId}>
+                        {afiliacion.representanteNombre || afiliacion.solicitanteUsuarioId}
+                      </span>
                     </div>
                   </td>
                   <td>
@@ -153,7 +156,9 @@ const AdminAfiliaciones: React.FC = () => {
                   </td>
                   <td>
                     {afiliacion.zonaId ? (
-                      <span className="zona-badge">{afiliacion.zonaId}</span>
+                      <span className="zona-badge" title={afiliacion.zonaId}>
+                        {afiliacion.nombreVereda || afiliacion.zonaId}
+                      </span>
                     ) : (
                       <span className="zona-pendiente">Sin asignar</span>
                     )}
@@ -180,7 +185,7 @@ const AdminAfiliaciones: React.FC = () => {
         </div>
       )}
 
-      {selectedAfiliacion && (
+      {selectedAfiliacion && createPortal(
         <div className="modal-overlay" onClick={() => setSelectedAfiliacion(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -216,7 +221,8 @@ const AdminAfiliaciones: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <style>{`
@@ -399,7 +405,7 @@ const AdminAfiliaciones: React.FC = () => {
           font-size: 1.125rem;
         }
 
-        .modal-overlay {
+        .admin-afiliaciones-page .modal-overlay {
           position: fixed;
           top: 0;
           left: 0;
@@ -409,17 +415,21 @@ const AdminAfiliaciones: React.FC = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          z-index: 1000;
+          z-index: 2000;
+          padding: 1rem;
+          box-sizing: border-box;
         }
 
-        .modal {
+        .admin-afiliaciones-page .modal {
           background: white;
           border-radius: 12px;
-          width: 90%;
+          width: 100%;
           max-width: 600px;
           max-height: 90vh;
           overflow-y: auto;
           box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+          margin: auto;
+          position: relative;
         }
 
         .modal-header {

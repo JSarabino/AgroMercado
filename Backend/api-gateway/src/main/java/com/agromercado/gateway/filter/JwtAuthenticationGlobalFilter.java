@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Filtro global para extraer información del JWT y agregarla como headers
  * Este filtro se ejecuta para todas las solicitudes que pasan por el Gateway
@@ -32,9 +34,9 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
             try {
                 String token = authHeader.substring(7);
 
-                // Parsear el token JWT
+                // Parsear el token JWT (usar mismo encoding que accounts-service)
                 Claims claims = Jwts.parser()
-                        .setSigningKey(jwtSecret.getBytes())
+                        .setSigningKey(jwtSecret.getBytes(StandardCharsets.UTF_8))
                         .parseClaimsJws(token)
                         .getBody();
 
@@ -42,6 +44,11 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
                     String userId = claims.getSubject();
                     String userName = claims.get("nombre", String.class); // El JWT usa "nombre" no "name"
                     String userEmail = claims.get("email", String.class);
+
+                    // Si el nombre está vacío o null, usar el userId como fallback
+                    if (userName == null || userName.trim().isEmpty()) {
+                        userName = userId != null ? userId : "Usuario";
+                    }
 
                     // Roles puede ser un array, convertir a String
                     String userRoles = "";
@@ -63,7 +70,7 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
                 // Crear una nueva request con los headers adicionales
                 ServerHttpRequest mutatedRequest = request.mutate()
                         .header("X-User-Id", userId != null ? userId : "")
-                        .header("X-User-Name", userName != null ? userName : "")
+                        .header("X-User-Name", userName != null ? userName : "Usuario")
                         .header("X-User-Email", userEmail != null ? userEmail : "")
                         .header("X-User-Roles", userRoles != null ? userRoles : "")
                         .header("X-Tenant-Id", tenantId != null ? tenantId : "default")
@@ -82,8 +89,17 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
             }
         }
 
-        // Si no hay token o hubo error, continuar sin modificar
-        return chain.filter(exchange);
+        // Si no hay token o hubo error, agregar headers por defecto para desarrollo
+        ServerHttpRequest defaultRequest = request.mutate()
+                .header("X-User-Id", "dev-user")
+                .header("X-User-Name", "Usuario Demo")
+                .header("X-User-Email", "")
+                .header("X-User-Roles", "")
+                .header("X-Tenant-Id", "default")
+                .build();
+
+        ServerWebExchange defaultExchange = exchange.mutate().request(defaultRequest).build();
+        return chain.filter(defaultExchange);
     }
 
     @Override

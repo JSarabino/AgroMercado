@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { mockProductos, mockPedidos } from '../data/mockData';
@@ -8,11 +8,16 @@ import productosService from '../services/productos.service';
 import type { CrearProductoRequest } from '../services/productos.service';
 import { TrendingUp, Package, ShoppingCart, DollarSign, Plus, FileText, Activity, MapPin } from 'lucide-react';
 
+interface ZonaConInfo extends SolicitudProductorZona {
+  nombreVereda?: string;
+  municipio?: string;
+}
+
 const ProductorDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [showAddProduct, setShowAddProduct] = useState(false);
-  const [zonasAfiliadas, setZonasAfiliadas] = useState<SolicitudProductorZona[]>([]);
+  const [zonasAfiliadas, setZonasAfiliadas] = useState<ZonaConInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -32,25 +37,46 @@ const ProductorDashboard: React.FC = () => {
   const misProductos = mockProductos.filter(p => p.productorId === 'p1');
   const misPedidos = mockPedidos.filter(p => p.productores.includes('p1'));
 
-  useEffect(() => {
-    cargarZonasAfiliadas();
-  }, [user]);
-
-  const cargarZonasAfiliadas = async () => {
+  const cargarZonasAfiliadas = useCallback(async () => {
     if (!user?.id) {
       setLoading(false);
       return;
     }
 
     try {
-      const zonas = await afiliacionesService.listarMisZonasAfiliadas(user.id);
-      setZonasAfiliadas(zonas);
+      const solicitudes = await afiliacionesService.listarMisZonasAfiliadas(user.id);
+
+      // Enriquecer cada solicitud con información de la zona
+      const zonasEnriquecidas: ZonaConInfo[] = await Promise.all(
+        solicitudes.map(async (solicitud) => {
+          try {
+            // Obtener información de la zona desde las afiliaciones
+            const afiliacionesZona = await afiliacionesService.listarAfiliacionesZona(solicitud.zonaId);
+            const afiliacionZona = afiliacionesZona.find(a => a.zonaId === solicitud.zonaId);
+
+            return {
+              ...solicitud,
+              nombreVereda: afiliacionZona?.nombreVereda,
+              municipio: afiliacionZona?.municipio,
+            };
+          } catch (error) {
+            console.error(`Error obteniendo info de zona ${solicitud.zonaId}:`, error);
+            return solicitud as ZonaConInfo;
+          }
+        })
+      );
+
+      setZonasAfiliadas(zonasEnriquecidas);
     } catch (error) {
       console.error('Error cargando zonas afiliadas:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    cargarZonasAfiliadas();
+  }, [cargarZonasAfiliadas]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -294,8 +320,14 @@ const ProductorDashboard: React.FC = () => {
       {showAddProduct && (
         <div className="modal-overlay" onClick={() => setShowAddProduct(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Agregar Nuevo Producto</h2>
-            <form className="product-form" onSubmit={handleSubmitProduct}>
+            <div className="modal-header">
+              <h2>Agregar Nuevo Producto</h2>
+              <button className="btn-close" onClick={() => setShowAddProduct(false)}>
+                ×
+              </button>
+            </div>
+            <div className="modal-body">
+              <form id="product-form" className="product-form" onSubmit={handleSubmitProduct}>
               {zonasAfiliadas.length > 0 && (
                 <div className="form-group">
                   <label>
@@ -311,7 +343,7 @@ const ProductorDashboard: React.FC = () => {
                     <option value="">Selecciona una zona</option>
                     {zonasAfiliadas.map((zona) => (
                       <option key={zona.zonaId} value={zona.zonaId}>
-                        {zona.zonaId} - {zona.nombreProductor || 'Zona'}
+                        {zona.nombreVereda || zona.zonaId} {zona.municipio ? `- ${zona.municipio}` : ''}
                       </option>
                     ))}
                   </select>
@@ -449,27 +481,35 @@ const ProductorDashboard: React.FC = () => {
                   Si no se proporciona, se usará una imagen por defecto
                 </small>
               </div>
-              <div className="form-actions">
-                <button
-                  type="button"
-                  className="btn-secondary"
-                  onClick={() => {
-                    setShowAddProduct(false);
-                    resetForm();
-                  }}
-                  disabled={submitting}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  disabled={zonasAfiliadas.length === 0 || submitting}
-                >
-                  {submitting ? 'Creando...' : 'Agregar Producto'}
-                </button>
-              </div>
             </form>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => {
+                  setShowAddProduct(false);
+                  resetForm();
+                }}
+                disabled={submitting}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const form = document.getElementById('product-form') as HTMLFormElement;
+                  if (form) {
+                    form.requestSubmit();
+                  }
+                }}
+                disabled={zonasAfiliadas.length === 0 || submitting}
+              >
+                {submitting ? 'Creando...' : 'Agregar Producto'}
+              </button>
+            </div>
           </div>
         </div>
       )}

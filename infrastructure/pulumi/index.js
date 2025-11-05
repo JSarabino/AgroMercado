@@ -183,16 +183,20 @@ echo "====================================="
 echo "AgroMercado Deployment Script"
 echo "====================================="
 
-cd /home/ubuntu/agromercado
+cd /home/ubuntu/agromercado || exit 1
+
+# Check if docker-compose.yml exists (indicates repo is cloned)
+if [ ! -f "docker-compose.yml" ]; then
+    echo "ERROR: docker-compose.yml not found!"
+    echo "Please clone your repository to /home/ubuntu/agromercado"
+    echo "Example: git clone <your-repo-url> /home/ubuntu/agromercado"
+    exit 1
+fi
 
 # Pull latest changes if git repo exists
 if [ -d ".git" ]; then
     echo "Pulling latest changes..."
-    git pull
-else
-    echo "Please clone your repository to /home/ubuntu/agromercado"
-    echo "Example: git clone <your-repo-url> /home/ubuntu/agromercado"
-    exit 1
+    git pull || echo "Warning: git pull failed, continuing with existing code..."
 fi
 
 # Stop existing containers
@@ -203,6 +207,10 @@ docker-compose down || true
 echo "Building and starting containers..."
 docker-compose up -d --build
 
+# Wait a bit for services to start
+echo "Waiting for services to start..."
+sleep 10
+
 # Show status
 echo "====================================="
 echo "Deployment complete!"
@@ -211,10 +219,11 @@ docker-compose ps
 
 echo ""
 echo "Application URLs:"
-echo "Frontend: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)"
-echo "API Gateway: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8080"
-echo "Eureka Server: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):8761"
-echo "RabbitMQ Management: http://$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4):15672"
+PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null || echo "localhost")
+echo "Frontend: http://${PUBLIC_IP}"
+echo "API Gateway: http://${PUBLIC_IP}:8080"
+echo "Eureka Server: http://${PUBLIC_IP}:8761"
+echo "RabbitMQ Management: http://${PUBLIC_IP}:15672"
 DEPLOY_SCRIPT
 
 chmod +x /home/ubuntu/deploy.sh

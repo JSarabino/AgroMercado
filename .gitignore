@@ -166,3 +166,5 @@ $RECYCLE.BIN/
 *.sql
 *.sqlite
 
+
+Backend/DEPLOYMENT.md
