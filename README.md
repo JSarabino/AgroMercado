@@ -8,3 +8,4 @@ Spring Boot + Maven + CQRS + DDD
 → Docker Compose (local)
 → API Gateway (entrada central)
 → Eureka (descubrimiento futuro)
+# Test Pipeline
