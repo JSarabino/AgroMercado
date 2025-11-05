@@ -85,12 +85,18 @@ public class AuthenticationService {
       }
     });
 
+    // Si no hay roles, agregar el tipo_usuario como rol por defecto
+    if (roles.isEmpty()) {
+      roles.add(usuario.getTipoUsuario().name()); // PRODUCTOR, CLIENTE, etc.
+    }
+
     var claims = JwtClaimsSet.builder()
         .subject(usuario.getUsuarioId())
         .issuedAt(now)
         .expiresAt(now.plusSeconds(defaultTtl))
         .claim("email", usuario.getEmail())
         .claim("nombre", usuario.getNombre())
+        .claim("tipo_usuario", usuario.getTipoUsuario().name())
         .claim("roles", roles)
         .build();
 
