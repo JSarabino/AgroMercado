@@ -50,20 +50,28 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
                         userName = userId != null ? userId : "Usuario";
                     }
 
-                    // Roles puede ser un array, convertir a String
-                    String userRoles = "";
-                    try {
-                        Object rolesObj = claims.get("roles");
-                        if (rolesObj instanceof java.util.List) {
-                            @SuppressWarnings("unchecked")
-                            java.util.List<String> rolesList = (java.util.List<String>) rolesObj;
-                            userRoles = String.join(",", rolesList);
-                        } else if (rolesObj instanceof String) {
-                            userRoles = (String) rolesObj;
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error al procesar roles: " + e.getMessage());
+                // Roles puede ser un array, convertir a String
+                String userRoles = "";
+                try {
+                    Object rolesObj = claims.get("roles");
+                    System.out.println("DEBUG: rolesObj class = " + (rolesObj != null ? rolesObj.getClass().getName() : "null"));
+                    System.out.println("DEBUG: rolesObj value = " + rolesObj);
+                    
+                    if (rolesObj instanceof java.util.List) {
+                        @SuppressWarnings("unchecked")
+                        java.util.List<String> rolesList = (java.util.List<String>) rolesObj;
+                        userRoles = String.join(",", rolesList);
+                        System.out.println("DEBUG: Roles extracted from List = " + userRoles);
+                    } else if (rolesObj instanceof String) {
+                        userRoles = (String) rolesObj;
+                        System.out.println("DEBUG: Roles extracted from String = " + userRoles);
+                    } else {
+                        System.out.println("DEBUG: Roles object is neither List nor String");
                     }
+                } catch (Exception e) {
+                    System.out.println("Error al procesar roles: " + e.getMessage());
+                    e.printStackTrace();
+                }
 
                     String tenantId = claims.get("tenantId", String.class);
 
