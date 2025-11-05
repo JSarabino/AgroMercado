@@ -1,0 +1,96 @@
+name: Health Check
+
+# Workflow opcional que verifica la salud de la aplicación
+# Se puede ejecutar manualmente o programar para ejecutarse periódicamente
+
+on:
+  workflow_dispatch:  # Permite ejecución manual desde GitHub UI
+  schedule:
+    # Ejecutar cada 6 horas (opcional, puedes descomentarlo)
+    # - cron: '0 */6 * * *'
+
+jobs:
+  health-check:
+    name: Check Application Health
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Frontend
+        run: |
+          echo "🌐 Checking Frontend..."
+          if curl -f -s -o /dev/null -w "%{http_code}" http://${{ secrets.EC2_HOST }} | grep -q "200\|301\|302"; then
+            echo "✅ Frontend is responding"
+          else
+            echo "❌ Frontend is not responding"
+            exit 1
+          fi
+
+      - name: Check API Gateway
+        run: |
+          echo "🔌 Checking API Gateway..."
+          RESPONSE=$(curl -s http://${{ secrets.EC2_HOST }}:8080/actuator/health)
+          echo "Response: $RESPONSE"
+
+          if echo "$RESPONSE" | grep -q '"status":"UP"'; then
+            echo "✅ API Gateway is healthy"
+          else
+            echo "❌ API Gateway is not healthy"
+            exit 1
+          fi
+
+      - name: Check Eureka Server
+        run: |
+          echo "🔍 Checking Eureka Server..."
+          if curl -f -s -o /dev/null http://${{ secrets.EC2_HOST }}:8761; then
+            echo "✅ Eureka Server is responding"
+          else
+            echo "❌ Eureka Server is not responding"
+            exit 1
+          fi
+
+      - name: Check RabbitMQ Management
+        run: |
+          echo "🐰 Checking RabbitMQ..."
+          if curl -f -s -o /dev/null http://${{ secrets.EC2_HOST }}:15672; then
+            echo "✅ RabbitMQ Management is responding"
+          else
+            echo "❌ RabbitMQ Management is not responding"
+            exit 1
+          fi
+
+      - name: Check Service Registration
+        run: |
+          echo "📋 Checking service registration in Eureka..."
+          APPS=$(curl -s http://${{ secrets.EC2_HOST }}:8761/eureka/apps)
+
+          # Verificar que los servicios estén registrados
+          SERVICES=("ACCOUNTS-SERVICE" "PRODUCTOS-SERVICE" "PEDIDOS-SERVICE" "API-GATEWAY")
+
+          for service in "${SERVICES[@]}"; do
+            if echo "$APPS" | grep -q "<name>$service</name>"; then
+              echo "✅ $service is registered in Eureka"
+            else
+              echo "⚠️  $service is NOT registered in Eureka"
+            fi
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "============================================"
+          echo "Health Check Summary"
+          echo "============================================"
+          echo "Frontend URL:     http://${{ secrets.EC2_HOST }}"
+          echo "API Gateway:      http://${{ secrets.EC2_HOST }}:8080"
+          echo "Eureka Dashboard: http://${{ secrets.EC2_HOST }}:8761"
+          echo "RabbitMQ Admin:   http://${{ secrets.EC2_HOST }}:15672"
+          echo "============================================"
+
+      - name: Notify on Failure
+        if: failure()
+        run: |
+          echo "============================================"
+          echo "❌ Health check failed!"
+          echo "Please investigate the EC2 instance"
+          echo "============================================"
+          # Aquí puedes agregar notificaciones a Slack, Discord, etc.
