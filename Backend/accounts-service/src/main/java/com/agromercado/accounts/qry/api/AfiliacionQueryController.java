@@ -37,9 +37,21 @@ public class AfiliacionQueryController {
       @RequestHeader(name = "X-User-Id", required = false) String callerUserId,
       @RequestHeader(name = "X-User-Roles", required = false) String callerRoles
   ) {
+    // DEBUG: Loggear parámetros y headers recibidos
+    System.out.println("=== DEBUG AfiliacionQueryController ===");
+    System.out.println("solicitante: " + solicitante);
+    System.out.println("zonaId: " + zonaId);
+    System.out.println("callerUserId: " + callerUserId);
+    System.out.println("callerRoles: " + callerRoles);
+    
     boolean adminGlobal = hasAdminGlobal(callerRoles);
     boolean isAdminZona = hasRole(callerRoles, "ADMIN_ZONA");
     boolean isProductorOrCliente = hasRole(callerRoles, "PRODUCTOR") || hasRole(callerRoles, "CLIENTE");
+    
+    System.out.println("adminGlobal: " + adminGlobal);
+    System.out.println("isAdminZona: " + isAdminZona);
+    System.out.println("isProductorOrCliente: " + isProductorOrCliente);
+    System.out.println("=====================================");
 
     // Si no hay parámetros
     if ((solicitante == null || solicitante.isBlank()) && (zonaId == null || zonaId.isBlank())) {
