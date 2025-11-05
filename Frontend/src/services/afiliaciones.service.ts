@@ -193,14 +193,13 @@ class AfiliacionesService {
 
   /**
    * Lista solo las zonas aprobadas (para que productores puedan seleccionar)
-   * El backend ya devuelve solo APROBADAS para PRODUCTOR/CLIENTE,
-   * pero agregamos un filtro adicional por seguridad
+   * El backend devuelve automáticamente solo APROBADAS para roles ADMIN_ZONA/PRODUCTOR/CLIENTE
    */
   async listarZonasAprobadas(): Promise<AfiliacionResumen[]> {
     try {
-      // Enviar estado=APROBADA para obtener solo zonas aprobadas
+      // El backend filtra automáticamente por rol: devuelve solo APROBADAS para ciertos roles
       const solicitudes = await apiService.get<AfiliacionResumen[]>(
-        `${API_ENDPOINTS.AFILIACIONES_QUERY}?estado=APROBADA`
+        API_ENDPOINTS.AFILIACIONES_QUERY
       );
 
       // Filtrar solo las que tienen zona asignada

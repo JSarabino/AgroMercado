@@ -24,9 +24,9 @@ public class AfiliacionQueryController {
   }
 
   /**
-   * GET /qry/afiliaciones?solicitante=... | ?zonaId=... | (sin params si ADMIN_GLOBAL o PRODUCTOR)
+   * GET /qry/afiliaciones?solicitante=... | ?zonaId=... | (sin params si ADMIN_GLOBAL, ADMIN_ZONA o PRODUCTOR)
    * - Si es ADMIN_GLOBAL sin parámetros: devuelve TODAS las afiliaciones
-   * - Si es PRODUCTOR/CLIENTE sin parámetros: devuelve solo las APROBADAS (para seleccionar zona)
+   * - Si es ADMIN_ZONA/PRODUCTOR/CLIENTE sin parámetros: devuelve solo las APROBADAS (para seleccionar zona)
    * - Si tiene parámetros: filtra por solicitante o zonaId
    * Redacción: si el caller no es solicitante ni ADMIN_GLOBAL, ocultamos datos sensibles.
    */
@@ -38,6 +38,7 @@ public class AfiliacionQueryController {
       @RequestHeader(name = "X-User-Roles", required = false) String callerRoles
   ) {
     boolean adminGlobal = hasAdminGlobal(callerRoles);
+    boolean isAdminZona = hasRole(callerRoles, "ADMIN_ZONA");
     boolean isProductorOrCliente = hasRole(callerRoles, "PRODUCTOR") || hasRole(callerRoles, "CLIENTE");
 
     // Si no hay parámetros
@@ -52,8 +53,8 @@ public class AfiliacionQueryController {
         );
       }
 
-      // PRODUCTOR o CLIENTE: devolver solo las APROBADAS (para que puedan seleccionar zona)
-      if (isProductorOrCliente) {
+      // ADMIN_ZONA, PRODUCTOR o CLIENTE: devolver solo las APROBADAS (para que puedan seleccionar zona)
+      if (isAdminZona || isProductorOrCliente) {
         List<AfiliacionZonaView> views = repo.findByEstado("APROBADA");
         return ResponseEntity.ok(
             views.stream()
