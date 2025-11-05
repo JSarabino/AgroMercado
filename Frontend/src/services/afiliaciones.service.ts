@@ -198,12 +198,14 @@ class AfiliacionesService {
    */
   async listarZonasAprobadas(): Promise<AfiliacionResumen[]> {
     try {
-      const solicitudes = await this.listarTodasLasSolicitudes();
+      // Enviar estado=APROBADA para obtener solo zonas aprobadas
+      const solicitudes = await apiService.get<AfiliacionResumen[]>(
+        `${API_ENDPOINTS.AFILIACIONES_QUERY}?estado=APROBADA`
+      );
 
-      // Filtrar solo las que están aprobadas y tienen zona asignada
+      // Filtrar solo las que tienen zona asignada
       const zonasAprobadas = solicitudes.filter(
         (afiliacion) =>
-          afiliacion.estado === 'APROBADA' &&
           afiliacion.zonaId &&
           afiliacion.zonaId.trim() !== ''
       );
