@@ -5,9 +5,9 @@ name: Health Check
 
 on:
   workflow_dispatch:  # Permite ejecución manual desde GitHub UI
-  schedule:
-    # Ejecutar cada 6 horas (opcional, puedes descomentarlo)
-    # - cron: '0 */6 * * *'
+  # Si quieres ejecución automática, descomenta las siguientes líneas:
+  # schedule:
+  #   - cron: '0 */6 * * *'  # Ejecutar cada 6 horas
 
 jobs:
   health-check:
