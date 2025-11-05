@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import afiliacionesService from '../services/afiliaciones.service';
-import type { SolicitudProductorZona, AfiliacionResumen } from '../services/afiliaciones.service';
+import type { SolicitudProductorZona } from '../services/afiliaciones.service';
 import { ArrowLeft, MapPin, Calendar, CheckCircle, FileText, Building2, Mail, Phone, Map } from 'lucide-react';
 
 interface ZonaConInfo extends SolicitudProductorZona {
