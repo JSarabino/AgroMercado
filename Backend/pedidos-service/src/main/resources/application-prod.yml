@@ -60,3 +60,8 @@ logging:
   level:
     root: INFO
     com.agromercado.pedidos: INFO
+
+# Configuración de servicios externos
+productos:
+  service:
+    url: http://PRODUCTOS-SERVICE  # Nombre del servicio en Eureka (mayúsculas)

@@ -3,6 +3,7 @@ package com.agromercado.pedidos.application.service;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,16 +16,13 @@ import java.math.BigDecimal;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ProductoClientService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${productos.service.url:http://localhost:5001}")
+    @Value("${productos.service.url:http://PRODUCTOS-SERVICE}")
     private String productosServiceUrl;
-
-    public ProductoClientService() {
-        this.restTemplate = new RestTemplate();
-    }
 
     public ProductoDTO obtenerProducto(Long productoId) {
         try {
