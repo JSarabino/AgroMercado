@@ -56,7 +56,7 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
                     Object rolesObj = claims.get("roles");
                     System.out.println("DEBUG: rolesObj class = " + (rolesObj != null ? rolesObj.getClass().getName() : "null"));
                     System.out.println("DEBUG: rolesObj value = " + rolesObj);
-                    
+
                     if (rolesObj instanceof java.util.List) {
                         @SuppressWarnings("unchecked")
                         java.util.List<String> rolesList = (java.util.List<String>) rolesObj;
