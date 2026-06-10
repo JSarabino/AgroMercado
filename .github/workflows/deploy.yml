@@ -1,13 +1,7 @@
 name: Deploy to AWS EC2
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [closed]
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -15,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Solo ejecutar si es un push a main o un PR mergeado a main
-    if: github.event_name == 'push' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
+    #if: github.event_name == 'push' || (github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main')
 
     steps:
       - name: Checkout code
