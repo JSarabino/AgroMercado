@@ -1,6 +1,6 @@
-# GitHub Actions Workflows
+# CI/CD Workflows - AgroMercado
 
-Este directorio contiene los workflows de CI/CD para AgroMercado.
+Este documento describe los workflows de GitHub Actions utilizados para automatizar el despliegue, monitoreo y rollback de AgroMercado.
 
 ## 📋 Workflows Disponibles
 
